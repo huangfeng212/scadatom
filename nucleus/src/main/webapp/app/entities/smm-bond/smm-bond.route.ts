@@ -21,7 +21,7 @@ export class SmmBondResolve implements Resolve<ISmmBond> {
         if (id) {
             return this.service.find(id).pipe(
                 filter((response: HttpResponse<SmmBond>) => response.ok),
-                map((SmmBond: HttpResponse<SmmBond>) => SmmBond.body)
+                map((smmBond: HttpResponse<SmmBond>) => smmBond.body)
             );
         } else if (smmDeviceId) {
             return of({ smmDevice: { id: smmDeviceId } } as ISmmBond);
