@@ -13,15 +13,18 @@ import io.scadatom.electron.service.mapper.ElectronOpMapper;
 import io.scadatom.electron.service.mapper.ParticleOpMapper;
 import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.ElectronRequestInitReq;
-import io.scadatom.neutron.FlattenedRequest;
+import io.scadatom.neutron.FlattenedMessage;
+import io.scadatom.neutron.OpCtrlReq;
 import io.scadatom.neutron.OpState;
 import io.scadatom.neutron.OpViewReq;
-import io.scadatom.neutron.ParticleCtrlReq;
 import io.scadatom.neutron.SmsChargerDTO;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -53,6 +56,8 @@ public class OperationService {
   private final ParticleOpRepository particleOpRepository;
   private final ParticleOpMapper particleOpMapper;
   private final ElectronOpMapper electronOpMapper;
+  private final Map<String, Function<FlattenedMessage, FlattenedMessage>> inboundRequestHandlers =
+      new HashMap<>();
 
   private final Long electronId;
 
@@ -79,47 +84,82 @@ public class OperationService {
     this.particleOpMapper = particleOpMapper;
     this.electronOpMapper = electronOpMapper;
     this.electronId = electronId;
+    inboundRequestHandlers.put("initElectron", this::handleInitElectron);
+    inboundRequestHandlers.put("viewElectron", this::handleViewElectron);
+    inboundRequestHandlers.put("ctrlElectron", this::handleCtrlElectron);
+    inboundRequestHandlers.put("viewParticle", this::handleViewParticle);
+    inboundRequestHandlers.put("ctrlParticle", this::handleCtrlParticle);
   }
 
-  @RabbitListener(queues = "#{queueInboundRequest.name}")
-  public String onInboundRequest(String message) throws IOException {
-    FlattenedRequest flattenedRequest = objectMapper.readValue(message, FlattenedRequest.class);
-    String response = FAILURE;
-    OpViewReq opViewReq;
-    switch (flattenedRequest.getIntent()) {
-      case "initElectron":
-        ElectronInitReq electronInitReq =
-            objectMapper.readValue(flattenedRequest.getPayload(), ElectronInitReq.class);
-        if (!Objects.equals(electronInitReq.getElectronDTO().getId(), electronId)) {
-          throw new IllegalArgumentException("non matching electron id from payload");
-        }
-        saveConfig(electronInitReq);
-        stop();
-        onStart();
-        response = SUCCESS;
-        break;
-      case "viewElectron":
-        opViewReq = objectMapper.readValue(flattenedRequest.getPayload(), OpViewReq.class);
-        response = replyOf(electronOpMapper.toDto(opDataService.getElectronOp(opViewReq.getId())));
-        break;
-      case "ctrlElectron":
-        response = "unsupported";
-        break;
-      case "viewParticle":
-        opViewReq = objectMapper.readValue(flattenedRequest.getPayload(), OpViewReq.class);
-        response = replyOf(particleOpMapper.toDto(opDataService.getParticleOp(opViewReq.getId())));
-        break;
-      case "ctrlParticle":
-        ParticleCtrlReq particleCtrlReq =
-            objectMapper.readValue(flattenedRequest.getPayload(), ParticleCtrlReq.class);
-        opChangeService.onCommandWritten(
-            particleCtrlReq.getId(),
-            particleCtrlReq.getCommand(),
-            "RemoteUser_" + particleCtrlReq.getUser());
-        response = SUCCESS;
-        break;
+  private FlattenedMessage handleInitElectron(FlattenedMessage flattenedMessage) {
+    try {
+      ElectronInitReq electronInitReq = flattenedMessage.peel(ElectronInitReq.class);
+      if (!Objects.equals(electronInitReq.getElectronDTO().getId(), electronId)) {
+        return new FlattenedMessage(FAILURE, "non matching electron id from payload");
+      }
+      saveConfig(electronInitReq);
+      stop();
+      onStart();
+      return new FlattenedMessage(SUCCESS);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return new FlattenedMessage(FAILURE, "can not parse payload");
+    } catch (Exception e) {
+      e.printStackTrace();
+      return new FlattenedMessage(FAILURE, e.getMessage());
     }
-    return response;
+  }
+
+  private FlattenedMessage handleViewElectron(FlattenedMessage flattenedMessage) {
+    try {
+      OpViewReq opViewReq = flattenedMessage.peel(OpViewReq.class);
+      return new FlattenedMessage(
+          SUCCESS, electronOpMapper.toDto(opDataService.getElectronOp(opViewReq.getId())));
+    } catch (IOException e) {
+      e.printStackTrace();
+      return new FlattenedMessage(FAILURE, "can not parse payload");
+    }
+  }
+
+  private FlattenedMessage handleCtrlElectron(FlattenedMessage flattenedMessage) {
+    try {
+      OpCtrlReq opCtrlReq = flattenedMessage.peel(OpCtrlReq.class);
+      switch (opCtrlReq.getCommand()) {
+        case "stop":
+          stop();
+          break;
+        case "start":
+          start();
+          break;
+      }
+      return new FlattenedMessage(SUCCESS);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return new FlattenedMessage(FAILURE, "can not parse payload");
+    }
+  }
+
+  private FlattenedMessage handleViewParticle(FlattenedMessage flattenedMessage) {
+    try {
+      OpViewReq opViewReq = flattenedMessage.peel(OpViewReq.class);
+      return new FlattenedMessage(
+          SUCCESS, particleOpMapper.toDto(opDataService.getParticleOp(opViewReq.getId())));
+    } catch (IOException e) {
+      e.printStackTrace();
+      return new FlattenedMessage(FAILURE, "can not parse or form message");
+    }
+  }
+
+  private FlattenedMessage handleCtrlParticle(FlattenedMessage flattenedMessage) {
+    try {
+      OpCtrlReq opCtrlReq = flattenedMessage.peel(OpCtrlReq.class);
+      opChangeService.onCommandWritten(
+          opCtrlReq.getId(), opCtrlReq.getCommand(), "RemoteUser_" + opCtrlReq.getUser());
+      return new FlattenedMessage(SUCCESS);
+    } catch (IOException e) {
+      e.printStackTrace();
+      return new FlattenedMessage(FAILURE, "can not parse");
+    }
   }
 
   private void saveConfig(ElectronInitReq config) {
@@ -163,8 +203,23 @@ public class OperationService {
     }
   }
 
-  private String replyOf(Object object) throws JsonProcessingException {
-    return objectMapper.writeValueAsString(object);
+  public void start() {
+    // onStart bond service
+    if (smmChargerService.getState() == OpState.Initialized) {
+      try {
+        smmChargerService.start();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    if (smsChargerService.getState() == OpState.Initialized) {
+      try {
+        smsChargerService.start();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+    opDataService.updateElectronOp(electronId, electronOp -> electronOp.setState(OpState.Started));
   }
 
   private Optional<ElectronInitReq> loadConfig() {
@@ -229,29 +284,32 @@ public class OperationService {
         electronId, electronOp -> electronOp.setState(OpState.Initialized));
   }
 
-  public void start() {
-    // onStart bond service
-    if (smmChargerService.getState() == OpState.Initialized) {
-      try {
-        smmChargerService.start();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    if (smsChargerService.getState() == OpState.Initialized) {
-      try {
-        smsChargerService.start();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    opDataService.updateElectronOp(electronId, electronOp -> electronOp.setState(OpState.Started));
+  private String flattenedRequestOf(String intent, Object payload) throws JsonProcessingException {
+    FlattenedMessage flattenedMessage = new FlattenedMessage();
+    flattenedMessage.setTitle(intent);
+    flattenedMessage.setPayload(objectMapper.writeValueAsString(payload));
+    return objectMapper.writeValueAsString(flattenedMessage);
   }
 
-  private String flattenedRequestOf(String intent, Object payload) throws JsonProcessingException {
-    FlattenedRequest flattenedRequest = new FlattenedRequest();
-    flattenedRequest.setIntent(intent);
-    flattenedRequest.setPayload(objectMapper.writeValueAsString(payload));
-    return objectMapper.writeValueAsString(flattenedRequest);
+  private String replyOf(Object object) throws JsonProcessingException {
+    return objectMapper.writeValueAsString(object);
+  }
+
+  private String responseOf(String result, String... explain) {
+    return result + ":" + String.join("|", explain);
+  }
+
+  @RabbitListener(queues = "#{queueInboundRequest.name}")
+  public String onInboundRequest(String message) throws IOException {
+    FlattenedMessage request = FlattenedMessage.inflate(message);
+    FlattenedMessage response;
+    Function<FlattenedMessage, FlattenedMessage> handler =
+        inboundRequestHandlers.get(request.getTitle());
+    if (handler != null) {
+      response = handler.apply(request);
+    } else {
+      response = new FlattenedMessage(FAILURE, "unknown intent " + request.getTitle());
+    }
+    return response.flat();
   }
 }

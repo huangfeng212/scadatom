@@ -1,6 +1,6 @@
 package io.scadatom.neutron;
 
-public class ParticleCtrlReq {
+public class OpCtrlReq {
 
   private Long id;
   private String command;
