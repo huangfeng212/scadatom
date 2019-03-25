@@ -1,0 +1,56 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <div *ngIf="electron">
+      <h2><span>Electron</span> {{electron.id}}</h2>
+      <hr>
+      <jhi-alert-error></jhi-alert-error>
+      <div class="row">
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Name</span></dt>
+            <dd>
+              <span>{{electron.name}}</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Serial Modbus Master Charger</span></dt>
+            <dd>
+              <a *ngIf="electron.smmCharger"
+                 [routerLink]="['/smm-charger', electron.smmCharger.id, 'view' ]">{{electron.smmCharger.id}}</a>
+              <button *ngIf="!electron.smmCharger"
+                      [routerLink]="['/smm-charger', 'new', electron.id]"
+                      class="btn btn-success" type="button"><span>Add</span></button>
+            </dd>
+            <dt><span>Serial Modbus Slave Charger</span></dt>
+            <dd>
+              <a *ngIf="electron.smsCharger"
+                 [routerLink]="['/sms-charger', electron.smsCharger.id, 'view' ]">{{electron.smsCharger.id}}</a>
+              <button *ngIf="!electron.smsCharger"
+                      [routerLink]="['/sms-charger', 'new', electron.id]"
+                      class="btn btn-success" type="button"><span>Add</span></button>
+            </dd>
+            <dt><span>Particles</span></dt>
+            <dd *ngFor="let particle of electron.particles">
+              <a [routerLink]="['/particle', particle.id, 'view' ]">{{particle.name}}</a>
+            </dd>
+            <button [routerLink]="['/particle', 'new', electron.id]"
+                    class="btn btn-success" type="button"><span>Add</span></button>
+          </dl>
+        </div>
+      </div>
+      <button (click)="previousState()"
+              class="btn btn-info"
+              type="submit">
+        <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+      </button>
+
+      <button [routerLink]="['/electron', electron.id, 'edit']"
+              class="btn btn-primary"
+              type="button">
+        <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

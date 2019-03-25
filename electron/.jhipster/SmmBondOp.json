@@ -1,0 +1,49 @@
+{
+    "name": "SmmBondOp",
+    "fields": [
+        {
+            "fieldName": "state",
+            "fieldType": "OpState",
+            "fieldValues": "Uninitialized,Initialized,Undefined,Disabled,Stopped,Started,Aborted"
+        },
+        {
+            "fieldName": "dt",
+            "fieldType": "ZonedDateTime"
+        },
+        {
+            "fieldName": "pollStatus",
+            "fieldType": "SmmPollStatus",
+            "fieldValues": "NA,Normal,IOError,IllegalFunction,IllegalDataAddress,IllegalDataValue,SlaveDeviceFailure,Acknowledge,SlaveDeviceBusy,MemoryParityError,UnknownError"
+        },
+        {
+            "fieldName": "readRequest",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "readResponse",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "writeRequest",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "writeResponse",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "writeRequestDt",
+            "fieldType": "ZonedDateTime"
+        }
+    ],
+    "relationships": [],
+    "changelogDate": "20190324202508",
+    "entityTableName": "smm_bond_op",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "serviceClass",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*"
+}

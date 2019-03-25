@@ -1,0 +1,52 @@
+<div>
+  <h2 id="page-heading">
+    <span>Particles</span>
+  </h2>
+  <jhi-alert></jhi-alert>
+  <br/>
+  <div *ngIf="particles" class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th><span>ID</span></th>
+        <th><span>Name</span></th>
+        <th><span>Electron</span></th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let particle of particles ;trackBy: trackId">
+        <td><a [routerLink]="['/particle', particle.id, 'view' ]">{{particle.id}}</a></td>
+        <td>{{particle.name}}</td>
+        <td>
+          <a [routerLink]="['../electron', particle.electron.id , 'view' ]">{{particle.electron.name}}</a>
+        </td>
+        <td class="text-right">
+          <div class="btn-group flex-btn-group-container">
+            <button [routerLink]="['/particle', particle.id, 'view' ]"
+                    class="btn btn-info btn-sm"
+                    type="submit">
+              <fa-icon [icon]="'eye'"></fa-icon>
+              <span class="d-none d-md-inline">View</span>
+            </button>
+            <button [routerLink]="['/particle', particle.id, 'edit']"
+                    class="btn btn-primary btn-sm"
+                    type="submit">
+              <fa-icon [icon]="'pencil-alt'"></fa-icon>
+              <span class="d-none d-md-inline">Edit</span>
+            </button>
+            <button [routerLink]="['/', 'particle', { outlets: { popup: particle.id + '/delete'} }]"
+                    class="btn btn-danger btn-sm"
+                    queryParamsHandling="merge"
+                    replaceUrl="true"
+                    type="submit">
+              <fa-icon [icon]="'times'"></fa-icon>
+              <span class="d-none d-md-inline">Delete</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

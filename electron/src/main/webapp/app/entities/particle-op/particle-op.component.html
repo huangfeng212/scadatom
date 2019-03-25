@@ -1,0 +1,62 @@
+<div>
+    <h2 id="page-heading">
+        <span>Particle Ops</span>
+        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-particle-op" [routerLink]="['/particle-op/new']">
+            <fa-icon [icon]="'plus'"></fa-icon>
+            <span >
+            Create new Particle Op
+            </span>
+        </button>
+    </h2>
+    <jhi-alert></jhi-alert>
+    <br/>
+    <div class="table-responsive" *ngIf="particleOps">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+            <th><span>ID</span></th>
+            <th><span>State</span></th>
+            <th><span>Dt</span></th>
+            <th><span>Value</span></th>
+            <th><span>Written By</span></th>
+            <th><span>Written Dt</span></th>
+            <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let particleOp of particleOps ;trackBy: trackId">
+                <td><a [routerLink]="['/particle-op', particleOp.id, 'view' ]">{{particleOp.id}}</a></td>
+                <td>{{particleOp.state}}</td>
+                <td>{{particleOp.dt | date:'medium'}}</td>
+                <td>{{particleOp.value}}</td>
+                <td>{{particleOp.writtenBy}}</td>
+                <td>{{particleOp.writtenDt | date:'medium'}}</td>
+                <td class="text-right">
+                    <div class="btn-group flex-btn-group-container">
+                        <button type="submit"
+                                [routerLink]="['/particle-op', particleOp.id, 'view' ]"
+                                class="btn btn-info btn-sm">
+                            <fa-icon [icon]="'eye'"></fa-icon>
+                            <span class="d-none d-md-inline">View</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/particle-op', particleOp.id, 'edit']"
+                                class="btn btn-primary btn-sm">
+                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
+                            <span class="d-none d-md-inline">Edit</span>
+                        </button>
+                        <button type="submit"
+                                [routerLink]="['/', 'particle-op', { outlets: { popup: particleOp.id + '/delete'} }]"
+                                replaceUrl="true"
+                                queryParamsHandling="merge"
+                                class="btn btn-danger btn-sm">
+                            <fa-icon [icon]="'times'"></fa-icon>
+                            <span class="d-none d-md-inline">Delete</span>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

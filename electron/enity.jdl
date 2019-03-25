@@ -1,0 +1,52 @@
+entity ElectronOp{
+	state OpState
+    dt ZonedDateTime
+}
+entity ParticleOp{
+	state OpState
+    dt ZonedDateTime
+    value String
+    writtenBy String
+    writtenDt ZonedDateTime
+}
+entity SmmChargerOp{
+	state OpState
+	dt ZonedDateTime
+}
+entity SmmDeviceOp{
+	state OpState
+	dt ZonedDateTime
+}
+entity SmmBondOp{
+	state OpState
+	dt ZonedDateTime
+    pollStatus SmmPollStatus
+    readRequest String
+    readResponse String
+    writeRequest String
+    writeResponse String
+    writeRequestDt ZonedDateTime
+}
+entity SmsChargerOp{
+	state OpState
+	dt ZonedDateTime
+}
+entity SmsDeviceOp{
+	state OpState
+	dt ZonedDateTime
+}
+entity SmsBondOp{
+	state OpState
+	dt ZonedDateTime
+    bytes String
+    writtenDt ZonedDateTime
+    writtenBytes String
+}
+enum OpState{
+	Uninitialized, Initialized, Undefined, Disabled, Stopped, Started, Aborted
+}
+enum SmmPollStatus {
+    NA, Normal, IOError, IllegalFunction, IllegalDataAddress, IllegalDataValue, SlaveDeviceFailure, Acknowledge, SlaveDeviceBusy, MemoryParityError, UnknownError
+}
+dto * with mapstruct
+service * with serviceClass

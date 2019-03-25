@@ -1,0 +1,58 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <div *ngIf="particle">
+      <h2><span>Particle</span> {{particle.id}}</h2>
+      <hr>
+      <jhi-alert-error></jhi-alert-error>
+      <div class="row">
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Name</span></dt>
+            <dd>
+              <span>{{particle.name}}</span>
+            </dd>
+            <dt><span>Decimal Format</span></dt>
+            <dd>
+              <span>{{particle.decimalFormat}}</span>
+            </dd>
+            <dt><span>Init Value</span></dt>
+            <dd>
+              <span>{{particle.initValue}}</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Electron</span></dt>
+            <dd>
+              <a [routerLink]="['/electron', particle.electron.id, 'view']">{{particle.electron.name}}</a>
+            </dd>
+            <dt><span>Serial Modbus Master Bond</span></dt>
+            <dd>
+              <a *ngIf="particle.smmBond; else nosmmBond"
+                 [routerLink]="['/smm-bond', particle.smmBond.id, 'view' ]">{{particle.smmBond.id}}</a>
+              <ng-template #nosmmBond><span>None</span></ng-template>
+            </dd>
+            <dt><span>Serial Modbus Slave Bond</span></dt>
+            <dd>
+              <a *ngIf="particle.smsBond; else nosmsBond"
+                 [routerLink]="['/sms-bond', particle.smsBond.id, 'view' ]">{{particle.smsBond.id}}</a>
+              <ng-template #nosmsBond><span>None</span></ng-template>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      <button (click)="previousState()"
+              class="btn btn-info"
+              type="submit">
+        <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+      </button>
+
+      <button [routerLink]="['/particle', particle.id, 'edit']"
+              class="btn btn-primary"
+              type="button">
+        <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

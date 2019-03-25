@@ -1,0 +1,81 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <div *ngIf="smmCharger">
+      <h2><span>Serial Modbus Master Charger</span> {{smmCharger.id}}</h2>
+      <hr>
+      <jhi-alert-error></jhi-alert-error>
+      <div class="row">
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Enabled</span></dt>
+            <dd>
+              <span>{{smmCharger.enabled}}</span>
+            </dd>
+            <dt><span>Port</span></dt>
+            <dd>
+              <span>{{smmCharger.port}}</span>
+            </dd>
+            <dt><span>Baud</span></dt>
+            <dd>
+              <span>{{smmCharger.baud}}</span>
+            </dd>
+            <dt><span>Databit</span></dt>
+            <dd>
+              <span>{{smmCharger.databit}}</span>
+            </dd>
+            <dt><span>Parity</span></dt>
+            <dd>
+              <span>{{smmCharger.parity}}</span>
+            </dd>
+            <dt><span>Stopbit</span></dt>
+            <dd>
+              <span>{{smmCharger.stopbit}}</span>
+            </dd>
+            <dt><span>Timeout</span></dt>
+            <dd>
+              <span>{{smmCharger.timeout}}</span>
+            </dd>
+            <dt><span>Retry</span></dt>
+            <dd>
+              <span>{{smmCharger.retry}}</span>
+            </dd>
+            <dt><span>Trans Delay</span></dt>
+            <dd>
+              <span>{{smmCharger.transDelay}}</span>
+            </dd>
+            <dt><span>Batch Delay</span></dt>
+            <dd>
+              <span>{{smmCharger.batchDelay}}</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Electron</span></dt>
+            <dd>
+              <a [routerLink]="['/electron', smmCharger.electron.id, 'view']">{{smmCharger.electron.name}}</a>
+            </dd>
+            <dt><span>Smm Devices</span></dt>
+            <dd *ngFor="let smmDevice of smmCharger.smmDevices">
+              <a [routerLink]="['/smm-device', smmDevice.id, 'view']">{{smmDevice.id}}</a>
+            </dd>
+            <button
+                [routerLink]="['/smm-device', 'new', smmCharger.id]"
+                class="btn btn-success" type="button"><span>Add</span></button>
+          </dl>
+        </div>
+      </div>
+      <button (click)="previousState()"
+              class="btn btn-info"
+              type="submit">
+        <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+      </button>
+
+      <button [routerLink]="['/smm-charger', smmCharger.id, 'edit']"
+              class="btn btn-primary"
+              type="button">
+        <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

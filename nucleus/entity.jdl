@@ -1,0 +1,87 @@
+DEFAULT_MIN_LENGTH = 1
+DEFAULT_MAX_LENGTH = 32
+DEFAULT_MIN = 0
+entity Electron {
+	name String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+}
+entity Particle {
+	name String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+    decimalFormat String
+    initValue String
+}
+entity SmmCharger {
+   	enabled Boolean required
+    port String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+    baud Integer required min(DEFAULT_MIN)
+    databit Integer required min(DEFAULT_MIN)
+    parity Parity required
+    stopbit Stopbit required
+    timeout Integer required min(DEFAULT_MIN)
+    retry Integer required min(DEFAULT_MIN)
+    transDelay Integer required min(DEFAULT_MIN)
+    batchDelay Integer required min(DEFAULT_MIN)
+}
+entity SmmDevice {
+	enabled Boolean required
+    name String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+    address String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+}
+entity SmmBond {
+	enabled Boolean required
+    regType RegType required
+    reg String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+    valueType ValueType
+    exprIn String
+    exprOut String
+}
+entity SmsCharger {
+	enabled Boolean required
+    port String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+    baud Integer required min(DEFAULT_MIN)
+    databit Integer required min(DEFAULT_MIN)
+    parity Parity required
+    stopbit Stopbit required
+	respDelay Integer required min(DEFAULT_MIN)
+}
+entity SmsDevice {
+	enabled Boolean required
+	name String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+    address String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+}
+entity SmsBond {
+	enabled Boolean required
+    regType RegType required
+    reg String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
+    valueType ValueType
+    exprIn String
+    exprOut String
+}
+
+dto * with mapstruct
+service * with serviceClass
+
+enum Parity {
+    None, Odd, Even, Mark, Space
+}
+enum Stopbit {
+	NA, One, OnePointFive, Two
+}
+enum ValueType {
+	Uint16, Int16, Fp32
+}
+enum RegType {
+    Coil, InputDiscrete, InputReg, HoldingReg
+}
+relationship OneToMany {
+	Electron{particle(name)} to Particle{electron(name) required}
+	SmmCharger to SmmDevice{smmCharger required}
+    SmmDevice to SmmBond{smmDevice required}
+	SmsCharger to SmsDevice{smsCharger required}
+    SmsDevice to SmsBond{smsDevice required}
+}
+relationship OneToOne {
+	SmmCharger{electron(name)} to Electron
+  	SmmBond{particle(name)} to Particle
+	SmsCharger{electron(name)} to Electron
+    SmsBond{particle(name)} to Particle
+}

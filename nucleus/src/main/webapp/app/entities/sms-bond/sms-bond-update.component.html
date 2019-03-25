@@ -1,0 +1,100 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <form #editForm="ngForm" (ngSubmit)="save()" name="editForm" novalidate role="form">
+      <h2 id="jhi-sms-bond-heading">{{isNew ? 'Create' : 'Edit'}} a Serial Modbus Slave Bond</h2>
+      <div>
+        <jhi-alert-error></jhi-alert-error>
+        <div [hidden]="isNew" class="form-group">
+          <label for="id">ID</label>
+          <input [(ngModel)]="smsBond.id" class="form-control" id="id" name="id"
+                 readonly type="text"/>
+        </div>
+        <div class="form-group">
+          <label for="smsDeviceName">Sms Device</label>
+          <input [(ngModel)]="smsDevice.id" class="form-control"
+                 id="smsDeviceName"
+                 name="smsDeviceName"
+                 readonly type="text"/>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_enabled">Enabled</label>
+          <input [(ngModel)]="smsBond.enabled" class="form-control" id="field_enabled" name="enabled"
+                 type="checkbox"/>
+          <div [hidden]="!(editForm.controls.enabled?.dirty && editForm.controls.enabled?.invalid)">
+            <small [hidden]="!editForm.controls.enabled?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_regType">Reg Type</label>
+          <select [(ngModel)]="smsBond.regType" class="form-control" id="field_regType" name="regType" required>
+            <option value="Coil">Coil</option>
+            <option value="InputDiscrete">InputDiscrete</option>
+            <option value="InputReg">InputReg</option>
+            <option value="HoldingReg">HoldingReg</option>
+          </select>
+          <div [hidden]="!(editForm.controls.regType?.dirty && editForm.controls.regType?.invalid)">
+            <small [hidden]="!editForm.controls.regType?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_reg">Reg</label>
+          <input [(ngModel)]="smsBond.reg" class="form-control" id="field_reg" maxlength="32"
+                 minlength="1" name="reg" required type="text"/>
+          <div [hidden]="!(editForm.controls.reg?.dirty && editForm.controls.reg?.invalid)">
+            <small [hidden]="!editForm.controls.reg?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+            <small [hidden]="!editForm.controls.reg?.errors?.minlength"
+                   class="form-text text-danger">
+              This field is required to be at least 1 characters.
+            </small>
+            <small [hidden]="!editForm.controls.reg?.errors?.maxlength"
+                   class="form-text text-danger">
+              This field cannot be longer than 32 characters.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_valueType">Value Type</label>
+          <select [(ngModel)]="smsBond.valueType" class="form-control" id="field_valueType" name="valueType">
+            <option value="Uint16">Uint16</option>
+            <option value="Int16">Int16</option>
+            <option value="Fp32">Fp32</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_exprIn">Expr In</label>
+          <input [(ngModel)]="smsBond.exprIn" class="form-control" id="field_exprIn" name="exprIn"
+                 type="text"/>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_exprOut">Expr Out</label>
+          <input [(ngModel)]="smsBond.exprOut" class="form-control" id="field_exprOut" name="exprOut"
+                 type="text"/>
+        </div>
+        <div *ngIf="isNew" class="form-group">
+          <label class="form-control-label" for="field_particle">Particle</label>
+          <select [(ngModel)]="smsBond.particle" class="form-control" id="field_particle" name="particle">
+            <option [ngValue]="null"></option>
+            <option *ngFor="let particleOption of particles; trackBy: trackParticleById" [ngValue]="particleOption.id">{{particleOption.name}}</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <button (click)="previousState()" class="btn btn-secondary" id="cancel-save" type="button">
+          <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span>Cancel</span>
+        </button>
+        <button [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary" id="save-entity" type="submit">
+          <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span>Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

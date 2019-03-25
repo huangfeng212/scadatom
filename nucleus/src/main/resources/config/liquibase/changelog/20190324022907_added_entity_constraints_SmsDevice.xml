@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <!--
+        Added the constraints for entity SmsDevice.
+    -->
+    <changeSet id="20190324022907-2" author="jhipster">
+        
+        <addForeignKeyConstraint baseColumnNames="sms_charger_id"
+                                 baseTableName="sms_device"
+                                 constraintName="fk_sms_device_sms_charger_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="sms_charger"/>
+
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,206 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <form #editForm="ngForm" (ngSubmit)="save()" name="editForm" novalidate role="form">
+      <h2 id="jhi-serial-modbus-master-charger-heading">{{isNew ? 'Create' : 'Edit'}} a Serial
+        Modbus Master Charger</h2>
+      <div>
+        <jhi-alert-error></jhi-alert-error>
+        <div [hidden]="isNew" class="form-group">
+          <label for="id">ID</label>
+          <input [(ngModel)]="smmCharger.id" class="form-control" id="id" name="id"
+                 readonly type="text"/>
+        </div>
+        <div class="form-group">
+          <label for="electronName">Electron</label>
+          <input [(ngModel)]="electron.name" class="form-control" id="electronName"
+                 name="electronName"
+                 readonly type="text"/>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_enabled">Enabled</label>
+          <input [(ngModel)]="smmCharger.enabled" class="form-control" id="field_enabled" name="enabled"
+                 type="checkbox"/>
+          <div [hidden]="!(editForm.controls.enabled?.dirty && editForm.controls.enabled?.invalid)">
+            <small [hidden]="!editForm.controls.enabled?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_port">Port</label>
+          <input [(ngModel)]="smmCharger.port" class="form-control" id="field_port" maxlength="32"
+                 minlength="1" name="port" required type="text"/>
+          <div [hidden]="!(editForm.controls.port?.dirty && editForm.controls.port?.invalid)">
+            <small [hidden]="!editForm.controls.port?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+            <small [hidden]="!editForm.controls.port?.errors?.minlength"
+                   class="form-text text-danger">
+              This field is required to be at least 1 characters.
+            </small>
+            <small [hidden]="!editForm.controls.port?.errors?.maxlength"
+                   class="form-text text-danger">
+              This field cannot be longer than 32 characters.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_baud">Baud</label>
+          <input [(ngModel)]="smmCharger.baud" class="form-control" id="field_baud" jhiMin="0"
+                 min="0" name="baud" required type="number"/>
+          <div [hidden]="!(editForm.controls.baud?.dirty && editForm.controls.baud?.invalid)">
+            <small [hidden]="!editForm.controls.baud?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+            <small [hidden]="!editForm.controls.baud?.errors?.min"
+                   class="form-text text-danger">
+              This field should be at least 0.
+            </small>
+            <small [hidden]="!editForm.controls.baud?.errors?.number"
+                   class="form-text text-danger">
+              This field should be a number.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_databit">Databit</label>
+          <input [(ngModel)]="smmCharger.databit" class="form-control" id="field_databit" jhiMin="0"
+                 min="0" name="databit" required type="number"/>
+          <div [hidden]="!(editForm.controls.databit?.dirty && editForm.controls.databit?.invalid)">
+            <small [hidden]="!editForm.controls.databit?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+            <small [hidden]="!editForm.controls.databit?.errors?.min"
+                   class="form-text text-danger">
+              This field should be at least 0.
+            </small>
+            <small [hidden]="!editForm.controls.databit?.errors?.number"
+                   class="form-text text-danger">
+              This field should be a number.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_parity">Parity</label>
+          <select [(ngModel)]="smmCharger.parity" class="form-control" id="field_parity" name="parity" required>
+            <option value="None">None</option>
+            <option value="Odd">Odd</option>
+            <option value="Even">Even</option>
+            <option value="Mark">Mark</option>
+            <option value="Space">Space</option>
+          </select>
+          <div [hidden]="!(editForm.controls.parity?.dirty && editForm.controls.parity?.invalid)">
+            <small [hidden]="!editForm.controls.parity?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_stopbit">Stopbit</label>
+          <select [(ngModel)]="smmCharger.stopbit" class="form-control" id="field_stopbit" name="stopbit" required>
+            <option value="NA">NA</option>
+            <option value="One">One</option>
+            <option value="OnePointFive">OnePointFive</option>
+            <option value="Two">Two</option>
+          </select>
+          <div [hidden]="!(editForm.controls.stopbit?.dirty && editForm.controls.stopbit?.invalid)">
+            <small [hidden]="!editForm.controls.stopbit?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_timeout">Timeout</label>
+          <input [(ngModel)]="smmCharger.timeout" class="form-control" id="field_timeout" jhiMin="0"
+                 min="0" name="timeout" required type="number"/>
+          <div [hidden]="!(editForm.controls.timeout?.dirty && editForm.controls.timeout?.invalid)">
+            <small [hidden]="!editForm.controls.timeout?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+            <small [hidden]="!editForm.controls.timeout?.errors?.min"
+                   class="form-text text-danger">
+              This field should be at least 0.
+            </small>
+            <small [hidden]="!editForm.controls.timeout?.errors?.number"
+                   class="form-text text-danger">
+              This field should be a number.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_retry">Retry</label>
+          <input [(ngModel)]="smmCharger.retry" class="form-control" id="field_retry" jhiMin="0"
+                 min="0" name="retry" required type="number"/>
+          <div [hidden]="!(editForm.controls.retry?.dirty && editForm.controls.retry?.invalid)">
+            <small [hidden]="!editForm.controls.retry?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+            <small [hidden]="!editForm.controls.retry?.errors?.min"
+                   class="form-text text-danger">
+              This field should be at least 0.
+            </small>
+            <small [hidden]="!editForm.controls.retry?.errors?.number"
+                   class="form-text text-danger">
+              This field should be a number.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_transDelay">Trans Delay</label>
+          <input [(ngModel)]="smmCharger.transDelay" class="form-control" id="field_transDelay" jhiMin="0"
+                 min="0" name="transDelay" required type="number"/>
+          <div [hidden]="!(editForm.controls.transDelay?.dirty && editForm.controls.transDelay?.invalid)">
+            <small [hidden]="!editForm.controls.transDelay?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+            <small [hidden]="!editForm.controls.transDelay?.errors?.min"
+                   class="form-text text-danger">
+              This field should be at least 0.
+            </small>
+            <small [hidden]="!editForm.controls.transDelay?.errors?.number"
+                   class="form-text text-danger">
+              This field should be a number.
+            </small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="field_batchDelay">Batch Delay</label>
+          <input [(ngModel)]="smmCharger.batchDelay" class="form-control" id="field_batchDelay" jhiMin="0"
+                 min="0" name="batchDelay" required type="number"/>
+          <div [hidden]="!(editForm.controls.batchDelay?.dirty && editForm.controls.batchDelay?.invalid)">
+            <small [hidden]="!editForm.controls.batchDelay?.errors?.required"
+                   class="form-text text-danger">
+              This field is required.
+            </small>
+            <small [hidden]="!editForm.controls.batchDelay?.errors?.min"
+                   class="form-text text-danger">
+              This field should be at least 0.
+            </small>
+            <small [hidden]="!editForm.controls.batchDelay?.errors?.number"
+                   class="form-text text-danger">
+              This field should be a number.
+            </small>
+          </div>
+        </div>
+
+      </div>
+      <div>
+        <button (click)="previousState()" class="btn btn-secondary" id="cancel-save" type="button">
+          <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span>Cancel</span>
+        </button>
+        <button [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary" id="save-entity" type="submit">
+          <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span>Save</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <div *ngIf="smsBond">
+      <h2><span>Serial Modbus Slave Bond</span> {{smsBond.id}}</h2>
+      <hr>
+      <jhi-alert-error></jhi-alert-error>
+      <div class="row">
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Enabled</span></dt>
+            <dd>
+              <span>{{smsBond.enabled}}</span>
+            </dd>
+            <dt><span>Reg Type</span></dt>
+            <dd>
+              <span>{{smsBond.regType}}</span>
+            </dd>
+            <dt><span>Reg</span></dt>
+            <dd>
+              <span>{{smsBond.reg}}</span>
+            </dd>
+            <dt><span>Value Type</span></dt>
+            <dd>
+              <span>{{smsBond.valueType}}</span>
+            </dd>
+            <dt><span>Expr In</span></dt>
+            <dd>
+              <span>{{smsBond.exprIn}}</span>
+            </dd>
+            <dt><span>Expr Out</span></dt>
+            <dd>
+              <span>{{smsBond.exprOut}}</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Particle</span></dt>
+            <dd>
+              <a [routerLink]="['/particle', smsBond.particle.id, 'view']">{{smsBond.particle.name}}</a>
+            </dd>
+            <dt><span>Sms Device</span></dt>
+            <dd>
+              <a [routerLink]="['/sms-device', smsBond.smsDevice.id, 'view']">{{smsBond.smsDevice.name}}</a>
+            </dd>
+          </dl>
+        </div>
+      </div>
+      <button (click)="previousState()"
+              class="btn btn-info"
+              type="submit">
+        <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+      </button>
+
+      <button [routerLink]="['/sms-bond', smsBond.id, 'edit']"
+              class="btn btn-primary"
+              type="button">
+        <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

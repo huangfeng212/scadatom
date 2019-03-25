@@ -1,0 +1,86 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
+            <h2 id="jhi-smm-bond-op-heading">Create or edit a Smm Bond Op</h2>
+            <div>
+                <jhi-alert-error></jhi-alert-error>
+                <div class="form-group" [hidden]="!smmBondOp.id">
+                    <label for="id">ID</label>
+                    <input type="text" class="form-control" id="id" name="id"
+                        [(ngModel)]="smmBondOp.id" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_state">State</label>
+                    <select class="form-control" name="state" [(ngModel)]="smmBondOp.state" id="field_state" >
+                        <option value="Uninitialized">Uninitialized</option>
+                        <option value="Initialized">Initialized</option>
+                        <option value="Undefined">Undefined</option>
+                        <option value="Disabled">Disabled</option>
+                        <option value="Stopped">Stopped</option>
+                        <option value="Started">Started</option>
+                        <option value="Aborted">Aborted</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_dt">Dt</label>
+                    <div class="d-flex">
+                        <input id="field_dt" type="datetime-local" class="form-control" name="dt" [(ngModel)]="dt" placeholder="YYYY-MM-DD HH:mm"
+                        />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_pollStatus">Poll Status</label>
+                    <select class="form-control" name="pollStatus" [(ngModel)]="smmBondOp.pollStatus" id="field_pollStatus" >
+                        <option value="NA">NA</option>
+                        <option value="Normal">Normal</option>
+                        <option value="IOError">IOError</option>
+                        <option value="IllegalFunction">IllegalFunction</option>
+                        <option value="IllegalDataAddress">IllegalDataAddress</option>
+                        <option value="IllegalDataValue">IllegalDataValue</option>
+                        <option value="SlaveDeviceFailure">SlaveDeviceFailure</option>
+                        <option value="Acknowledge">Acknowledge</option>
+                        <option value="SlaveDeviceBusy">SlaveDeviceBusy</option>
+                        <option value="MemoryParityError">MemoryParityError</option>
+                        <option value="UnknownError">UnknownError</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_readRequest">Read Request</label>
+                    <input type="text" class="form-control" name="readRequest" id="field_readRequest"
+                        [(ngModel)]="smmBondOp.readRequest" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_readResponse">Read Response</label>
+                    <input type="text" class="form-control" name="readResponse" id="field_readResponse"
+                        [(ngModel)]="smmBondOp.readResponse" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_writeRequest">Write Request</label>
+                    <input type="text" class="form-control" name="writeRequest" id="field_writeRequest"
+                        [(ngModel)]="smmBondOp.writeRequest" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_writeResponse">Write Response</label>
+                    <input type="text" class="form-control" name="writeResponse" id="field_writeResponse"
+                        [(ngModel)]="smmBondOp.writeResponse" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_writeRequestDt">Write Request Dt</label>
+                    <div class="d-flex">
+                        <input id="field_writeRequestDt" type="datetime-local" class="form-control" name="writeRequestDt" [(ngModel)]="writeRequestDt" placeholder="YYYY-MM-DD HH:mm"
+                        />
+                    </div>
+                </div>
+
+            </div>
+            <div>
+                <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
+                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span>Cancel</span>
+                </button>
+                <button type="submit" id="save-entity" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span>Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

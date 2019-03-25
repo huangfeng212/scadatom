@@ -1,0 +1,24 @@
+<div class="row">
+  <div class="col-md-3">
+    <span class="hipster img-fluid rounded"></span>
+  </div>
+  <div class="col-md-9">
+    <h1 class="display-4">Welcome!</h1>
+    <p class="lead">This is Scadatom-Nucleus</p>
+    <div [ngSwitch]="isAuthenticated()">
+      <div *ngSwitchCase="true" class="alert alert-success">
+                <span *ngIf="account" id="home-logged-message"
+                > You are logged in as user "{{account.login}}". </span>
+      </div>
+      <div *ngSwitchCase="false" class="alert alert-warning">
+        <span>If you want to </span>
+        <a (click)="login()" class="alert-link">sign
+          in</a><span>, you can try the default accounts:<br/>- Administrator (login="admin" and password="admin") <br/>- User (login="user" and password="user").</span>
+      </div>
+      <div *ngSwitchCase="false" class="alert alert-warning">
+        <span>You don't have an account yet?</span>&nbsp;
+        <a class="alert-link" routerLink="register">Register a new account</a>
+      </div>
+    </div>
+  </div>
+</div>

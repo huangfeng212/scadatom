@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022901_added_entity_Electron.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022902_added_entity_Particle.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022903_added_entity_SmmCharger.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022904_added_entity_SmmDevice.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022905_added_entity_SmmBond.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022906_added_entity_SmsCharger.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022907_added_entity_SmsDevice.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022908_added_entity_SmsBond.xml" relativeToChangelogFile="false"/>
+    <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
+    <include file="config/liquibase/changelog/20190324022902_added_entity_constraints_Particle.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022903_added_entity_constraints_SmmCharger.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022904_added_entity_constraints_SmmDevice.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022905_added_entity_constraints_SmmBond.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022906_added_entity_constraints_SmsCharger.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022907_added_entity_constraints_SmsDevice.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20190324022908_added_entity_constraints_SmsBond.xml" relativeToChangelogFile="false"/>
+    <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
+</databaseChangeLog>

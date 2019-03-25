@@ -1,0 +1,54 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <div *ngIf="smmDevice">
+      <h2><span>Serial Modbus Master Device</span> {{smmDevice.id}}</h2>
+      <hr>
+      <jhi-alert-error></jhi-alert-error>
+      <div class="row">
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Enabled</span></dt>
+            <dd>
+              <span>{{smmDevice.enabled}}</span>
+            </dd>
+            <dt><span>Name</span></dt>
+            <dd>
+              <span>{{smmDevice.name}}</span>
+            </dd>
+            <dt><span>Address</span></dt>
+            <dd>
+              <span>{{smmDevice.address}}</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Smm Charger</span></dt>
+            <dd>
+              <a [routerLink]="['/smm-charger', smmDevice?.smmCharger.id, 'view']">{{smmDevice?.smmCharger.id}}</a>
+            </dd>
+            <dt><span>Serial Modbus Master Bonds</span></dt>
+            <dd *ngFor="let smmBond of smmDevice.smmBonds">
+              <a [routerLink]="['/smm-bond', smmBond.id, 'view' ]">{{smmBond.id}}</a>
+            </dd>
+            <button
+                [routerLink]="['/smm-bond', 'new', smmDevice.id]"
+                class="btn btn-success" type="button"><span>Add</span></button>
+          </dl>
+        </div>
+      </div>
+
+      <button (click)="previousState()"
+              class="btn btn-info"
+              type="submit">
+        <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+      </button>
+
+      <button [routerLink]="['/smm-device', smmDevice.id, 'edit']"
+              class="btn btn-primary"
+              type="button">
+        <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

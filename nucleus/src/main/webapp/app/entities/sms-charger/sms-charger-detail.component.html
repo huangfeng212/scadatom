@@ -1,0 +1,69 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <div *ngIf="smsCharger">
+      <h2><span>Serial Modbus Slave Charger</span> {{smsCharger.id}}</h2>
+      <hr>
+      <jhi-alert-error></jhi-alert-error>
+      <div class="row">
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Enabled</span></dt>
+            <dd>
+              <span>{{smsCharger.enabled}}</span>
+            </dd>
+            <dt><span>Port</span></dt>
+            <dd>
+              <span>{{smsCharger.port}}</span>
+            </dd>
+            <dt><span>Baud</span></dt>
+            <dd>
+              <span>{{smsCharger.baud}}</span>
+            </dd>
+            <dt><span>Databit</span></dt>
+            <dd>
+              <span>{{smsCharger.databit}}</span>
+            </dd>
+            <dt><span>Parity</span></dt>
+            <dd>
+              <span>{{smsCharger.parity}}</span>
+            </dd>
+            <dt><span>Stopbit</span></dt>
+            <dd>
+              <span>{{smsCharger.stopbit}}</span>
+            </dd>
+            <dt><span>Resp Delay</span></dt>
+            <dd>
+              <span>{{smsCharger.respDelay}}</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Electron</span></dt>
+            <dd>
+              <a [routerLink]="['/electron', smsCharger.electron.id, 'view']">{{smsCharger.electron.name}}</a>
+            </dd>
+            <dt><span>Sms Devices</span></dt>
+            <dd *ngFor="let smsDevice of smsCharger.smsDevices">
+              <a [routerLink]="['/sms-device', smsDevice.id, 'view']">{{smsDevice.id}}</a>
+            </dd>
+            <button
+                [routerLink]="['/sms-device', 'new', smsCharger.id]"
+                class="btn btn-success" type="button"><span>Add</span></button>
+          </dl>
+        </div>
+      </div>
+      <button (click)="previousState()"
+              class="btn btn-info"
+              type="submit">
+        <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+      </button>
+
+      <button [routerLink]="['/sms-charger', smsCharger.id, 'edit']"
+              class="btn btn-primary"
+              type="button">
+        <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

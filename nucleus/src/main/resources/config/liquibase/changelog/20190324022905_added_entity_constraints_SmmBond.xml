@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <!--
+        Added the constraints for entity SmmBond.
+    -->
+    <changeSet id="20190324022905-2" author="jhipster">
+        
+        <addForeignKeyConstraint baseColumnNames="particle_id"
+                                 baseTableName="smm_bond"
+                                 constraintName="fk_smm_bond_particle_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="particle"/>
+
+        <addForeignKeyConstraint baseColumnNames="smm_device_id"
+                                 baseTableName="smm_bond"
+                                 constraintName="fk_smm_bond_smm_device_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="smm_device"/>
+
+    </changeSet>
+</databaseChangeLog>

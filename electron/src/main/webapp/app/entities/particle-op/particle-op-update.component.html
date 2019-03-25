@@ -1,0 +1,60 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <form name="editForm" role="form" novalidate (ngSubmit)="save()" #editForm="ngForm">
+            <h2 id="jhi-particle-op-heading">Create or edit a Particle Op</h2>
+            <div>
+                <jhi-alert-error></jhi-alert-error>
+                <div class="form-group" [hidden]="!particleOp.id">
+                    <label for="id">ID</label>
+                    <input type="text" class="form-control" id="id" name="id"
+                        [(ngModel)]="particleOp.id" readonly />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_state">State</label>
+                    <select class="form-control" name="state" [(ngModel)]="particleOp.state" id="field_state" >
+                        <option value="Uninitialized">Uninitialized</option>
+                        <option value="Initialized">Initialized</option>
+                        <option value="Undefined">Undefined</option>
+                        <option value="Disabled">Disabled</option>
+                        <option value="Stopped">Stopped</option>
+                        <option value="Started">Started</option>
+                        <option value="Aborted">Aborted</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_dt">Dt</label>
+                    <div class="d-flex">
+                        <input id="field_dt" type="datetime-local" class="form-control" name="dt" [(ngModel)]="dt" placeholder="YYYY-MM-DD HH:mm"
+                        />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_value">Value</label>
+                    <input type="text" class="form-control" name="value" id="field_value"
+                        [(ngModel)]="particleOp.value" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_writtenBy">Written By</label>
+                    <input type="text" class="form-control" name="writtenBy" id="field_writtenBy"
+                        [(ngModel)]="particleOp.writtenBy" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label" for="field_writtenDt">Written Dt</label>
+                    <div class="d-flex">
+                        <input id="field_writtenDt" type="datetime-local" class="form-control" name="writtenDt" [(ngModel)]="writtenDt" placeholder="YYYY-MM-DD HH:mm"
+                        />
+                    </div>
+                </div>
+
+            </div>
+            <div>
+                <button type="button" id="cancel-save" class="btn btn-secondary"  (click)="previousState()">
+                    <fa-icon [icon]="'ban'"></fa-icon>&nbsp;<span>Cancel</span>
+                </button>
+                <button type="submit" id="save-entity" [disabled]="editForm.form.invalid || isSaving" class="btn btn-primary">
+                    <fa-icon [icon]="'save'"></fa-icon>&nbsp;<span>Save</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

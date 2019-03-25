@@ -1,0 +1,54 @@
+<div class="row justify-content-center">
+  <div class="col-8">
+    <div *ngIf="smsDevice">
+      <h2><span>Serial Modbus Slave Device</span> {{smsDevice.id}}</h2>
+      <hr>
+      <jhi-alert-error></jhi-alert-error>
+      <div class="row">
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Enabled</span></dt>
+            <dd>
+              <span>{{smsDevice.enabled}}</span>
+            </dd>
+            <dt><span>Name</span></dt>
+            <dd>
+              <span>{{smsDevice.name}}</span>
+            </dd>
+            <dt><span>Address</span></dt>
+            <dd>
+              <span>{{smsDevice.address}}</span>
+            </dd>
+          </dl>
+        </div>
+        <div class="col-6">
+          <dl class="row-md jh-entity-details">
+            <dt><span>Sms Charger</span></dt>
+            <dd>
+              <a [routerLink]="['/sms-charger', smsDevice.smsCharger.id, 'view']">{{smsDevice.smsCharger.id}}</a>
+            </dd>
+            <dt><span>Sms Bonds</span></dt>
+            <dd *ngFor="let smsBond of smsDevice.smsBonds">
+              <a [routerLink]="['/sms-bond', smsBond.id, 'view' ]">{{smsBond.id}}</a>
+            </dd>
+            <button
+                [routerLink]="['/sms-bond', 'new', smsDevice.id]"
+                class="btn btn-success" type="button"><span>Add</span></button>
+          </dl>
+        </div>
+      </div>
+
+      <button (click)="previousState()"
+              class="btn btn-info"
+              type="submit">
+        <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+      </button>
+
+      <button [routerLink]="['/sms-device', smsDevice.id, 'edit']"
+              class="btn btn-primary"
+              type="button">
+        <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+      </button>
+    </div>
+  </div>
+</div>

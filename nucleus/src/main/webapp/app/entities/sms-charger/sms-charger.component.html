@@ -1,0 +1,52 @@
+<div>
+  <h2 id="page-heading">
+    <span>Serial Modbus Slave Chargers</span>
+  </h2>
+  <jhi-alert></jhi-alert>
+  <br/>
+  <div *ngIf="smsChargers" class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th><span>ID</span></th>
+        <th><span>Enabled</span></th>
+        <th><span>Electron</span></th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let smsCharger of smsChargers ;trackBy: trackId">
+        <td><a [routerLink]="['/sms-charger', smsCharger.id, 'view' ]">{{smsCharger.id}}</a></td>
+        <td>{{smsCharger.enabled}}</td>
+        <td>
+          <a [routerLink]="['../electron', smsCharger.electron.id , 'view' ]">{{smsCharger.electron.name}}</a>
+        </td>
+        <td class="text-right">
+          <div class="btn-group flex-btn-group-container">
+            <button [routerLink]="['/sms-charger', smsCharger.id, 'view' ]"
+                    class="btn btn-info btn-sm"
+                    type="submit">
+              <fa-icon [icon]="'eye'"></fa-icon>
+              <span class="d-none d-md-inline">View</span>
+            </button>
+            <button [routerLink]="['/sms-charger', smsCharger.id, 'edit']"
+                    class="btn btn-primary btn-sm"
+                    type="submit">
+              <fa-icon [icon]="'pencil-alt'"></fa-icon>
+              <span class="d-none d-md-inline">Edit</span>
+            </button>
+            <button [routerLink]="['/', 'sms-charger', { outlets: { popup: smsCharger.id + '/delete'} }]"
+                    class="btn btn-danger btn-sm"
+                    queryParamsHandling="merge"
+                    replaceUrl="true"
+                    type="submit">
+              <fa-icon [icon]="'times'"></fa-icon>
+              <span class="d-none d-md-inline">Delete</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,58 @@
+<div>
+  <h2 id="page-heading">
+    <span>Serial Modbus Slave Devices</span>
+  </h2>
+  <jhi-alert></jhi-alert>
+  <br/>
+  <div *ngIf="smsDevices" class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th><span>ID</span></th>
+        <th><span>Enabled</span></th>
+        <th><span>Name</span></th>
+        <th><span>Address</span></th>
+        <th><span>Sms Charger</span></th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let smsDevice of smsDevices ;trackBy: trackId">
+        <td><a [routerLink]="['/sms-device', smsDevice.id, 'view' ]">{{smsDevice.id}}</a></td>
+        <td>{{smsDevice.enabled}}</td>
+        <td>{{smsDevice.name}}</td>
+        <td>{{smsDevice.address}}</td>
+        <td>
+          <div *ngIf="smsDevice.smsCharger">
+            <a [routerLink]="['../sms-charger', smsDevice.smsCharger.id , 'view' ]">{{smsDevice.smsCharger.id}}</a>
+          </div>
+        </td>
+        <td class="text-right">
+          <div class="btn-group flex-btn-group-container">
+            <button [routerLink]="['/sms-device', smsDevice.id, 'view' ]"
+                    class="btn btn-info btn-sm"
+                    type="submit">
+              <fa-icon [icon]="'eye'"></fa-icon>
+              <span class="d-none d-md-inline">View</span>
+            </button>
+            <button [routerLink]="['/sms-device', smsDevice.id, 'edit']"
+                    class="btn btn-primary btn-sm"
+                    type="submit">
+              <fa-icon [icon]="'pencil-alt'"></fa-icon>
+              <span class="d-none d-md-inline">Edit</span>
+            </button>
+            <button [routerLink]="['/', 'sms-device', { outlets: { popup: smsDevice.id + '/delete'} }]"
+                    class="btn btn-danger btn-sm"
+                    queryParamsHandling="merge"
+                    replaceUrl="true"
+                    type="submit">
+              <fa-icon [icon]="'times'"></fa-icon>
+              <span class="d-none d-md-inline">Delete</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

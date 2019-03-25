@@ -1,0 +1,43 @@
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div *ngIf="smsBondOp">
+            <h2><span>Sms Bond Op</span> {{smsBondOp.id}}</h2>
+            <hr>
+            <jhi-alert-error></jhi-alert-error>
+            <dl class="row-md jh-entity-details">
+                <dt><span>State</span></dt>
+                <dd>
+                    <span>{{smsBondOp.state}}</span>
+                </dd>
+                <dt><span>Dt</span></dt>
+                <dd>
+                    <span>{{smsBondOp.dt}}</span>
+                </dd>
+                <dt><span>Bytes</span></dt>
+                <dd>
+                    <span>{{smsBondOp.bytes}}</span>
+                </dd>
+                <dt><span>Written Dt</span></dt>
+                <dd>
+                    <span>{{smsBondOp.writtenDt}}</span>
+                </dd>
+                <dt><span>Written Bytes</span></dt>
+                <dd>
+                    <span>{{smsBondOp.writtenBytes}}</span>
+                </dd>
+            </dl>
+
+            <button type="submit"
+                    (click)="previousState()"
+                    class="btn btn-info">
+                <fa-icon [icon]="'arrow-left'"></fa-icon>&nbsp;<span> Back</span>
+            </button>
+
+            <button type="button"
+                    [routerLink]="['/sms-bond-op', smsBondOp.id, 'edit']"
+                    class="btn btn-primary">
+                <fa-icon [icon]="'pencil-alt'"></fa-icon>&nbsp;<span> Edit</span>
+            </button>
+        </div>
+    </div>
+</div>

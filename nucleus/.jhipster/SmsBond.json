@@ -1,0 +1,71 @@
+{
+    "name": "SmsBond",
+    "fields": [
+        {
+            "fieldName": "enabled",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "regType",
+            "fieldType": "RegType",
+            "fieldValues": "Coil,InputDiscrete,InputReg,HoldingReg",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "reg",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required",
+                "minlength",
+                "maxlength"
+            ],
+            "fieldValidateRulesMinlength": 1,
+            "fieldValidateRulesMaxlength": 32
+        },
+        {
+            "fieldName": "valueType",
+            "fieldType": "ValueType",
+            "fieldValues": "Uint16,Int16,Fp32"
+        },
+        {
+            "fieldName": "exprIn",
+            "fieldType": "String"
+        },
+        {
+            "fieldName": "exprOut",
+            "fieldType": "String"
+        }
+    ],
+    "relationships": [
+        {
+            "relationshipType": "one-to-one",
+            "relationshipName": "particle",
+            "otherEntityName": "particle",
+            "otherEntityField": "name",
+            "ownerSide": true,
+            "otherEntityRelationshipName": "smsBond"
+        },
+        {
+            "relationshipType": "many-to-one",
+            "relationshipValidateRules": "required",
+            "relationshipName": "smsDevice",
+            "otherEntityName": "smsDevice",
+            "otherEntityField": "id",
+            "otherEntityRelationshipName": "smsDevice"
+        }
+    ],
+    "changelogDate": "20190324022908",
+    "entityTableName": "sms_bond",
+    "dto": "mapstruct",
+    "pagination": "no",
+    "service": "serviceClass",
+    "jpaMetamodelFiltering": false,
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "applications": "*"
+}
