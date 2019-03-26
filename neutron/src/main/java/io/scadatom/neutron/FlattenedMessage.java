@@ -6,6 +6,10 @@ import java.io.IOException;
 
 public class FlattenedMessage {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  /**
+   * for request, title is the string of intent
+   * for response, title is composed of result:explanation1|explanation2...
+   */
   private String title;
   private String payload;
 

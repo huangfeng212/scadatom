@@ -57,45 +57,31 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
   }
 
   @Override
-  public void start() {
-    try {
-      log.info("starting with port {}...", serialParameters.getPortName());
-      abstractSerialConnection.open();
-      modbusSerialTransaction = new ModbusSerialTransaction(abstractSerialConnection);
-      modbusSerialTransaction.setRetries(smmChargerDTO.getRetry());
-      modbusSerialTransaction.setTransDelayMS(smmChargerDTO.getTransDelay());
-      log.info("starting polling thread...");
-      updateFlag = true;
-      updateThread.start();
-      opDataService.updateSmmChargerOp(
-          smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Started));
-    } catch (IOException ex) {
-      log.error(
-          "port {} failed to open, {} {}",
-          serialParameters.getPortName(),
-          ex.getClass().getSimpleName(),
-          ex.getMessage());
-      throw new RuntimeException(
-          "non-existing port "
-              + smmChargerDTO.getPort()
-              + " assigned to SerialModbusMasterCharger");
-    }
+  public void start() throws IOException {
+    log.info("opening port {} ...", serialParameters.getPortName());
+    abstractSerialConnection.open();
+    modbusSerialTransaction = new ModbusSerialTransaction(abstractSerialConnection);
+    modbusSerialTransaction.setRetries(smmChargerDTO.getRetry());
+    modbusSerialTransaction.setTransDelayMS(smmChargerDTO.getTransDelay());
+    log.info("starting polling thread ...");
+    updateFlag = true;
+    updateThread.start();
+    opDataService.updateSmmChargerOp(
+        smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Started));
   }
 
   @Override
   public void stop() {
     try {
       updateFlag = false;
-      log.info("stoping polling thread...");
+      log.info("stopping polling thread ...");
       updateThread.join();
-      log.info("success!");
     } catch (InterruptedException ex) {
       log.error(
           "joining polling thread failed. {}, {}", ex.getClass().getSimpleName(), ex.getMessage());
     }
-    log.info("stopping port {}...", serialParameters.getPortName());
+    log.info("stopping port {} ...", serialParameters.getPortName());
     abstractSerialConnection.close(); // todo can this be closed if already closed?
-    log.info("success!");
     opDataService.updateSmmChargerOp(
         smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Stopped));
   }
@@ -103,24 +89,26 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
   @Override
   public void initialize(@NotNull ElectronInitReq config) {
     smmChargerDTO = config.getSmmChargerDTO();
+    if (smmChargerDTO == null) {
+      opDataService.updateSmmChargerOp(
+          smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Undefined));
+      return;
+    }
     if (!smmChargerDTO.getEnabled()) {
       opDataService.updateSmmChargerOp(
           smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Disabled));
       return;
     }
+    opDataService.updateSmmChargerOp(
+        smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Uninitialized));
+    // load into data structure
     config
         .getSmmDeviceDTOS()
         .forEach(smmDeviceDTO -> smmDeviceDTOMap.put(smmDeviceDTO.getId(), smmDeviceDTO));
     config
         .getSmmBondDTOS()
         .forEach(smmBondDTO -> smmBondDTOMap.put(smmBondDTO.getId(), smmBondDTO));
-    serialParameters =
-        SerialPortUtil.acquirePort(
-            smmChargerDTO.getPort(),
-            smmChargerDTO.getBaud(),
-            smmChargerDTO.getDatabit(),
-            smmChargerDTO.getParity(),
-            smmChargerDTO.getStopbit());
+    // weave the relations
     smmChargerDTO
         .getSmmDevices()
         .forEach(
@@ -208,11 +196,17 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                     smmDeviceDTO.getId(), smmDeviceOp -> smmDeviceOp.setState(OpState.Disabled));
               }
             });
-
-    // conn and thread
+    // connection and thread
+    serialParameters =
+        SerialPortUtil.acquirePort(
+            smmChargerDTO.getPort(),
+            smmChargerDTO.getBaud(),
+            smmChargerDTO.getDatabit(),
+            smmChargerDTO.getParity(),
+            smmChargerDTO.getStopbit());
     abstractSerialConnection = new SerialConnection(serialParameters);
     abstractSerialConnection.setTimeout(this.smmChargerDTO.getTimeout());
-    updateThread = new Thread(this, "SerialModbusMasterCharger updater");
+    updateThread = new Thread(this, "SmmCharger Service Poller");
     opDataService.updateSmmChargerOp(
         smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Initialized));
   }
@@ -222,15 +216,13 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
     return opDataService.getSmmChargerOp(smmChargerDTO.getId()).getState();
   }
 
-  @Override
+    @Override
+    public long getChargerId() {
+        return smmChargerDTO.getId();
+    }
+
+    @Override
   public void run() {
-    smmBondOperationMap
-        .values()
-        .forEach(
-            smmBondOperation ->
-                opDataService.updateSmmBondOp(
-                    smmBondOperation.getSmmBondDTO().getId(),
-                    smmBondOp -> smmBondOp.setState(OpState.Started)));
     outerloop:
     while (updateFlag) {
       try {
@@ -247,20 +239,10 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
         if (millistoRest > 0) {
           Thread.sleep(millistoRest);
         }
-      } catch (Exception ex) {
+      } catch (Exception ex) { // wont quit thread no matter what happens
         log.error("{}, {}", ex.getClass().getSimpleName(), ex.getMessage());
       }
     }
-    smmBondOperationMap
-        .values()
-        .forEach(
-            smmBondOperation ->
-                opDataService.updateSmmBondOp(
-                    smmBondOperation.getSmmBondDTO().getId(),
-                    smmBondOp -> {
-                      smmBondOp.setState(OpState.Stopped);
-                      smmBondOp.setPollStatus(SmmPollStatus.NA);
-                    }));
   }
 
   private void readStsAndWriteCmd(@NotNull SmmBondOperation smmBondOperation) {
@@ -293,7 +275,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                 smmBondOperation.getSts(),
                 Double.valueOf(commandWatcher.getCommand()))) { // command is not applied yet
               log.debug(
-                  "SerialModbusMasterBond {} writing cmd {} to particle {}, when sts is {}",
+                  "SmmBond {} writing cmd {} to particle {}, when sts is {}",
                   smmBondOperation.getSmmBondDTO().getId(),
                   commandWatcher.getCommand(),
                   smmBondOperation.getSmmBondDTO().getParticle().getId(),
