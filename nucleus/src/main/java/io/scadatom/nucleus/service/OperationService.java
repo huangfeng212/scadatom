@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -203,7 +204,11 @@ public class OperationService {
                         new OpCtrlReq()
                             .id(electron.getId())
                             .command(opCtrlReq.getCommand())
-                            .user("RemoteUser_" + "TODO"))
+                            .user(
+                                SecurityContextHolder.getContext()
+                                    .getAuthentication()
+                                    .getPrincipal()
+                                    .toString()))
                     .flat());
         parseResp(resp, Void.class);
       } else {
@@ -247,7 +252,11 @@ public class OperationService {
                         new OpCtrlReq()
                             .id(particle.getId())
                             .command(opCtrlReq.getCommand())
-                            .user("RemoteUser_" + "TODO"))
+                            .user(
+                                SecurityContextHolder.getContext()
+                                    .getAuthentication()
+                                    .getPrincipal()
+                                    .toString()))
                     .flat());
         parseResp(resp, Void.class);
       } else {

@@ -60,7 +60,7 @@ public class OperationService {
   private final ElectronOpMapper electronOpMapper;
   private final Map<String, Function<FlattenedMessage, FlattenedMessage>> inboundRequestHandlers =
       new HashMap<>();
-      private final FlattenedMessageHandler flattenedMessageHandler;
+  private final FlattenedMessageHandler flattenedMessageHandler;
 
   private final Long electronId;
 
@@ -92,7 +92,7 @@ public class OperationService {
     inboundRequestHandlers.put(CTRL_ELECTRON, this::handleCtrlElectron);
     inboundRequestHandlers.put(VIEW_PARTICLE, this::handleViewParticle);
     inboundRequestHandlers.put(CTRL_PARTICLE, this::handleCtrlParticle);
-      flattenedMessageHandler = new FlattenedMessageHandler(inboundRequestHandlers);
+    flattenedMessageHandler = new FlattenedMessageHandler(inboundRequestHandlers);
   }
 
   private FlattenedMessage handleInitElectron(FlattenedMessage flattenedMessage) {
@@ -168,8 +168,31 @@ public class OperationService {
 
   public void stop() {
     opChangeService.dismissAll();
-    smsChargerService.stop();
-    smmChargerService.stop();
+    switch (smmChargerService.getState()) {
+      case Initialized:
+      case Started:
+        try {
+          smmChargerService.stop();
+        } catch (Exception e) {
+          e.printStackTrace();
+          opDataService.updateSmmChargerOp(
+              smmChargerService.getChargerId(),
+              smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
+        }
+    }
+    switch (smsChargerService.getState()) {
+      case Initialized:
+      case Started:
+        try {
+          smsChargerService.stop();
+        } catch (Exception e) {
+          e.printStackTrace();
+          opDataService.updateSmsChargerOp(
+              smsChargerService.getChargerId(),
+              smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
+        }
+    }
+    opDataService.updateElectronOp(electronId, electronOp -> electronOp.setState(OpState.Stopped));
   }
 
   @PostConstruct
@@ -284,10 +307,10 @@ public class OperationService {
 
   @RabbitListener(queues = "#{queueInboundRequest.name}")
   public String onInboundRequest(String message) {
-      try {
-          return flattenedMessageHandler.handle(message);
-      } catch (IOException e) {
-          return FAILURE+":can not parse payload";
-      }
+    try {
+      return flattenedMessageHandler.handle(message);
+    } catch (IOException e) {
+      return FAILURE + ":can not parse payload";
+    }
   }
 }
