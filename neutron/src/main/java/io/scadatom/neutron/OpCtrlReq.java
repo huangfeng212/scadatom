@@ -29,4 +29,19 @@ public class OpCtrlReq {
   public void setId(Long id) {
     this.id = id;
   }
+
+  public OpCtrlReq id(Long id) {
+    setId(id);
+    return this;
+  }
+
+  public OpCtrlReq command(String command) {
+    setCommand(command);
+    return this;
+  }
+
+  public OpCtrlReq user(String user) {
+    setUser(user);
+    return this;
+  }
 }

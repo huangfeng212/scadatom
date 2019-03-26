@@ -1,18 +1,25 @@
 package io.scadatom.nucleus.service;
 
+import static io.scadatom.neutron.Intents.REGISTER_ELECTRON;
+import static io.scadatom.neutron.OpResult.FAILURE;
+import static io.scadatom.neutron.OpResult.SUCCESS;
+import static io.scadatom.neutron.OpResult.TIMEOUT;
 import static io.scadatom.nucleus.config.RabbitmqConfig.ROUTING_TO_ELECTRON;
 import static io.scadatom.nucleus.config.RabbitmqConfig.TOPIC_SCADATOM;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.scadatom.domain.Particle;
 import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.ElectronOpDTO;
 import io.scadatom.neutron.FlattenedMessage;
+import io.scadatom.neutron.FlattenedMessageHandler;
 import io.scadatom.neutron.Intents;
 import io.scadatom.neutron.OpCtrlReq;
+import io.scadatom.neutron.OpException;
 import io.scadatom.neutron.OpResult;
+import io.scadatom.neutron.OpViewReq;
+import io.scadatom.neutron.ParticleOpDTO;
 import io.scadatom.nucleus.domain.Electron;
+import io.scadatom.nucleus.domain.Particle;
 import io.scadatom.nucleus.repository.ElectronRepository;
 import io.scadatom.nucleus.repository.ParticleRepository;
 import io.scadatom.nucleus.service.mapper.ElectronMapper;
@@ -23,21 +30,11 @@ import io.scadatom.nucleus.service.mapper.SmmDeviceMapper;
 import io.scadatom.nucleus.service.mapper.SmsBondMapper;
 import io.scadatom.nucleus.service.mapper.SmsChargerMapper;
 import io.scadatom.nucleus.service.mapper.SmsDeviceMapper;
-import io.scadatom.service.dto.ElectronCtrlReqDTO;
-import io.scadatom.service.dto.ElectronCtrlRespDTO;
-import io.scadatom.service.dto.ElectronViewRespDTO;
-import io.scadatom.service.dto.ParticleCtrlReqDTO;
-import io.scadatom.service.dto.ParticleCtrlRespDTO;
-import io.scadatom.service.dto.ParticleViewRespDTO;
-import io.scadatom.shared.message.InboundRequest;
-import io.scadatom.shared.message.OutboundRequest;
-import io.scadatom.shared.message.electron2nucleus.ElectronRequestInitReq;
-import io.scadatom.shared.message.nucleus2electron.ElectronCtrlReq;
-import io.scadatom.shared.message.nucleus2electron.ElectronViewReq;
-import io.scadatom.shared.message.nucleus2electron.ParticleCtrlReq;
-import io.scadatom.shared.message.nucleus2electron.ParticleViewReq;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +60,9 @@ public class OperationService {
   private final SmsChargerMapper smsChargerMapper;
   private final SmsDeviceMapper smsDeviceMapper;
   private final SmsBondMapper smsBondMapper;
+  private final Map<String, Function<FlattenedMessage, FlattenedMessage>> inboundRequestHandlers =
+      new HashMap<>();
+  private final FlattenedMessageHandler flattenedMessageHandler;
 
   public OperationService(
       ElectronRepository electronRepository,
@@ -89,26 +89,26 @@ public class OperationService {
     this.smsChargerMapper = smsChargerMapper;
     this.smsDeviceMapper = smsDeviceMapper;
     this.smsBondMapper = smsBondMapper;
+    inboundRequestHandlers.put(REGISTER_ELECTRON, this::handleRegisterElectron);
+    flattenedMessageHandler = new FlattenedMessageHandler(inboundRequestHandlers);
   }
 
-  public FlattenedMessage initElectron(OpCtrlReq opCtrlReq) throws IOException {
-    Optional<Electron> optionalElectron = electronRepository.findById(opCtrlReq.getId());
-    if (optionalElectron.isPresent()) {
-      Object resp =
-          rabbitTemplate.convertSendAndReceive(
-              TOPIC_SCADATOM,
-              ROUTING_TO_ELECTRON + opCtrlReq.getId(),
-              new FlattenedMessage(Intents.initElectron, makeConfig(optionalElectron.get())));
-      if (resp == null) {
-        return new FlattenedMessage(OpResult.Timeout.name());
+  private FlattenedMessage handleRegisterElectron(FlattenedMessage flattenedMessage) {
+    try {
+      OpCtrlReq opCtrlReq = flattenedMessage.peel(OpCtrlReq.class);
+      Optional<Electron> optionalElectron = electronRepository.findById(opCtrlReq.getId());
+      if (optionalElectron.isPresent()) {
+        return new FlattenedMessage(SUCCESS, makeConfig(optionalElectron.get()));
+      } else {
+        return new FlattenedMessage(OpResult.INVALID + ":id not found");
       }
-      return FlattenedMessage.inflate(resp.toString());
-    } else {
-      return new FlattenedMessage(OpResult.Invalid.name() + ":id not exist");
+    } catch (IOException e) {
+      e.printStackTrace();
+      return new FlattenedMessage(FAILURE + ":can not parse payload");
     }
   }
 
-  public ElectronInitReq makeConfig(Electron electron) {
+  private ElectronInitReq makeConfig(Electron electron) {
     ElectronInitReq electronInitReq = new ElectronInitReq();
     electronInitReq.setElectronDTO(electronMapper.toDto(electron));
     electronInitReq.setParticleDTOS(
@@ -136,96 +136,134 @@ public class OperationService {
     return electronInitReq;
   }
 
-  public ElectronOpDTO viewElectron(Long id) throws JsonProcessingException {
-    if (electronRepository.existsById(id)) {
-      Object resp =
-          rabbitTemplate.convertSendAndReceive(
-              TOPIC_SCADATOM,
-              ROUTING_TO_ELECTRON + id,
-              outboundPayloadOf("viewElectron", new ElectronViewReq(id)));
-      return new ElectronViewRespDTO(resp == null ? TIMEOUT : resp.toString());
-    } else {
-      return new ElectronViewRespDTO(ID_NOT_EXIST);
+  public void initElectron(long id) throws OpException {
+    try {
+      Optional<Electron> optionalElectron = electronRepository.findById(id);
+      if (optionalElectron.isPresent()) {
+        Object resp =
+            rabbitTemplate.convertSendAndReceive(
+                TOPIC_SCADATOM,
+                ROUTING_TO_ELECTRON + id,
+                new FlattenedMessage(Intents.INIT_ELECTRON, makeConfig(optionalElectron.get()))
+                    .flat());
+        parseResp(resp, Void.class);
+      } else {
+        throw new OpException(OpResult.INVALID + ":id not exist");
+      }
+    } catch (Exception e) {
+      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
     }
   }
 
-  private String outboundPayloadOf(String intent, Object payload) throws JsonProcessingException {
-    OutboundRequest outboundRequest = new OutboundRequest();
-    outboundRequest.setIntent(intent);
-    outboundRequest.setPayload(objectMapper.writeValueAsString(payload));
-    return objectMapper.writeValueAsString(outboundRequest);
-  }
-
-  public ElectronCtrlRespDTO ctrlElectron(ElectronCtrlReqDTO electronCtrlReqDTO)
-      throws JsonProcessingException {
-    if (electronRepository.existsById(electronCtrlReqDTO.getId())) {
-      Object resp =
-          rabbitTemplate.convertSendAndReceive(
-              TOPIC_SCADATOM,
-              ROUTING_TO_ELECTRON + electronCtrlReqDTO.getId(),
-              outboundPayloadOf("ctrlElectron", new ElectronCtrlReq(electronCtrlReqDTO.getId())));
-      return new ElectronCtrlRespDTO(resp == null ? TIMEOUT : resp.toString());
-    } else {
-      return new ElectronCtrlRespDTO(ID_NOT_EXIST);
+  private <T> T parseResp(Object resp, Class<T> clazz) throws OpException {
+    if (resp == null) {
+      throw new OpException(TIMEOUT);
+    }
+    try {
+      FlattenedMessage flattenedMessage = FlattenedMessage.inflate(resp.toString());
+      if (!flattenedMessage.getTitle().equals(SUCCESS)) {
+        throw new OpException(flattenedMessage.getTitle()); // specific error
+      } else if (clazz != Void.class) {
+        return flattenedMessage.peel(clazz);
+      }
+      return null;
+    } catch (IOException e) {
+      throw new OpException(FAILURE + ":can not parse payload");
     }
   }
 
-  public ParticleViewRespDTO viewParticle(Long id) throws JsonProcessingException {
-    Optional<Particle> optionalParticle = particleRepository.findById(id);
-    if (optionalParticle.isPresent()) {
-      Particle particle = optionalParticle.get();
-      Object resp =
-          rabbitTemplate.convertSendAndReceive(
-              TOPIC_SCADATOM,
-              ROUTING_TO_ELECTRON + particle.getElectron().getId(),
-              outboundPayloadOf("viewParticle", new ParticleViewReq(id)));
-      return new ParticleViewRespDTO(
-          resp == null ? TIMEOUT : resp.toString()); // need resp to respDTO and mapper
+  public ElectronOpDTO viewElectron(Long id) throws OpException {
+    try {
+      if (electronRepository.existsById(id)) {
+        Object resp =
+            rabbitTemplate.convertSendAndReceive(
+                TOPIC_SCADATOM,
+                ROUTING_TO_ELECTRON + id,
+                new FlattenedMessage(Intents.VIEW_ELECTRON, new OpViewReq().id(id)).flat());
+        return parseResp(resp, ElectronOpDTO.class);
+      } else {
+        throw new OpException(OpResult.INVALID + ":id not exist");
+      }
+    } catch (Exception e) {
+      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
     }
-    return new ParticleViewRespDTO(ID_NOT_EXIST);
   }
 
-  public ParticleCtrlRespDTO ctrlParticle(ParticleCtrlReqDTO particleCtrlReqDTO)
-      throws JsonProcessingException {
-    Optional<Particle> optionalParticle = particleRepository.findById(particleCtrlReqDTO.getId());
-    if (optionalParticle.isPresent()) {
-      Particle particle = optionalParticle.get();
-      Object resp =
-          rabbitTemplate.convertSendAndReceive(
-              TOPIC_SCADATOM,
-              ROUTING_TO_ELECTRON + particle.getElectron().getId(),
-              outboundPayloadOf(
-                  "ctrlParticle",
-                  new ParticleCtrlReq(
-                      particleCtrlReqDTO.getId(), 888L, particleCtrlReqDTO.getCmd())));
-      return new ParticleCtrlRespDTO(
-          resp == null ? TIMEOUT : resp.toString()); // need resp to respDTO and mapper
+  public void ctrlElectron(OpCtrlReq opCtrlReq) throws OpException {
+    try {
+      Optional<Electron> optionalElectron = electronRepository.findById(opCtrlReq.getId());
+      if (optionalElectron.isPresent()) {
+        Electron electron = optionalElectron.get();
+        Object resp =
+            rabbitTemplate.convertSendAndReceive(
+                TOPIC_SCADATOM,
+                ROUTING_TO_ELECTRON + electron.getId(),
+                new FlattenedMessage(
+                        Intents.CTRL_ELECTRON,
+                        new OpCtrlReq()
+                            .id(electron.getId())
+                            .command(opCtrlReq.getCommand())
+                            .user("RemoteUser_" + "TODO"))
+                    .flat());
+        parseResp(resp, Void.class);
+      } else {
+        throw new OpException(OpResult.INVALID + ":id not exist");
+      }
+    } catch (Exception e) {
+      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
     }
-    return new ParticleCtrlRespDTO(ID_NOT_EXIST);
+  }
+
+  public ParticleOpDTO viewParticle(Long id) throws OpException {
+    try {
+      Optional<Particle> optionalParticle = particleRepository.findById(id);
+      if (optionalParticle.isPresent()) {
+        Particle particle = optionalParticle.get();
+        Object resp =
+            rabbitTemplate.convertSendAndReceive(
+                TOPIC_SCADATOM,
+                ROUTING_TO_ELECTRON + particle.getElectron().getId(),
+                new FlattenedMessage(Intents.VIEW_PARTICLE, new OpViewReq().id(id)).flat());
+        return parseResp(resp, ParticleOpDTO.class);
+      } else {
+        throw new OpException(OpResult.INVALID + ":id not exist");
+      }
+    } catch (Exception e) {
+      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
+    }
+  }
+
+  public void ctrlParticle(OpCtrlReq opCtrlReq) throws OpException {
+    try {
+      Optional<Particle> optionalParticle = particleRepository.findById(opCtrlReq.getId());
+      if (optionalParticle.isPresent()) {
+        Particle particle = optionalParticle.get();
+        Object resp =
+            rabbitTemplate.convertSendAndReceive(
+                TOPIC_SCADATOM,
+                ROUTING_TO_ELECTRON + particle.getElectron().getId(),
+                new FlattenedMessage(
+                        Intents.CTRL_PARTICLE,
+                        new OpCtrlReq()
+                            .id(particle.getId())
+                            .command(opCtrlReq.getCommand())
+                            .user("RemoteUser_" + "TODO"))
+                    .flat());
+        parseResp(resp, Void.class);
+      } else {
+        throw new OpException(OpResult.INVALID + ":id not exist");
+      }
+    } catch (Exception e) {
+      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
+    }
   }
 
   @RabbitListener(queues = "#{queueInboundRequest.name}")
-  public String onInboundRequest(String message) throws IOException {
-    InboundRequest inboundRequest = objectMapper.readValue(message, InboundRequest.class);
-    String response = FAILURE;
-    switch (inboundRequest.getIntent()) {
-      case "requestInitElectron":
-        ElectronRequestInitReq electronRequestInitReq =
-            objectMapper.readValue(inboundRequest.getPayload(), ElectronRequestInitReq.class);
-        Optional<ElectronInitReq> optionalElectronInitReq =
-            electronRepository
-                .findById(electronRequestInitReq.getId())
-                .map(operationMapper::toElectronInitReq);
-        if (optionalElectronInitReq.isPresent()) {
-          ElectronInitReq electronInitReq = optionalElectronInitReq.get();
-          rabbitTemplate.convertAndSend(
-              TOPIC_SCADATOM,
-              ROUTING_TO_ELECTRON + electronRequestInitReq.getId(),
-              outboundPayloadOf("initElectron", electronInitReq));
-          response = SUCCESS;
-        }
-        break;
+  public String onInboundRequest(String message) {
+    try {
+      return flattenedMessageHandler.handle(message);
+    } catch (IOException e) {
+      return FAILURE + ":can not parse payload";
     }
-    return response;
   }
 }
