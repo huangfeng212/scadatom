@@ -6,10 +6,14 @@ import static io.scadatom.neutron.OpResult.TIMEOUT;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 
 public class FlattenedMessage {
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  static {
+    OBJECT_MAPPER.registerModule(new JavaTimeModule());
+  }
   /**
    * for request, title is the string of intent for response, title is composed of
    * result:explanation1|explanation2...

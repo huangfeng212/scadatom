@@ -1,45 +1,45 @@
 entity ElectronOp{
 	state OpState
-    dt ZonedDateTime
+    dt Instant
 }
 entity ParticleOp{
 	state OpState
-    dt ZonedDateTime
+    dt Instant
     value String
     writtenBy String
-    writtenDt ZonedDateTime
+    writtenDt Instant
 }
 entity SmmChargerOp{
 	state OpState
-	dt ZonedDateTime
+	dt Instant
 }
 entity SmmDeviceOp{
 	state OpState
-	dt ZonedDateTime
+	dt Instant
 }
 entity SmmBondOp{
 	state OpState
-	dt ZonedDateTime
+	dt Instant
     pollStatus SmmPollStatus
     readRequest String
     readResponse String
     writeRequest String
     writeResponse String
-    writeRequestDt ZonedDateTime
+    writeRequestDt Instant
 }
 entity SmsChargerOp{
 	state OpState
-	dt ZonedDateTime
+	dt Instant
 }
 entity SmsDeviceOp{
 	state OpState
-	dt ZonedDateTime
+	dt Instant
 }
 entity SmsBondOp{
 	state OpState
-	dt ZonedDateTime
+	dt Instant
     bytes String
-    writtenDt ZonedDateTime
+    writtenDt Instant
     writtenBytes String
 }
 enum OpState{

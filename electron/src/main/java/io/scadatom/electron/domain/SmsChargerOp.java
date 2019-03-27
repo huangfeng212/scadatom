@@ -6,7 +6,7 @@ import io.scadatom.neutron.OpState;
 import javax.persistence.*;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -26,7 +26,7 @@ public class SmsChargerOp implements Serializable {
     private OpState state;
 
     @Column(name = "dt")
-    private ZonedDateTime dt;
+    private Instant dt;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public Long getId() {
@@ -50,16 +50,16 @@ public class SmsChargerOp implements Serializable {
         this.state = state;
     }
 
-    public ZonedDateTime getDt() {
+    public Instant getDt() {
         return dt;
     }
 
-    public SmsChargerOp dt(ZonedDateTime dt) {
+    public SmsChargerOp dt(Instant dt) {
         this.dt = dt;
         return this;
     }
 
-    public void setDt(ZonedDateTime dt) {
+    public void setDt(Instant dt) {
         this.dt = dt;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove

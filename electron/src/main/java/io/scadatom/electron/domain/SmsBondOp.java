@@ -6,7 +6,7 @@ import io.scadatom.neutron.OpState;
 import javax.persistence.*;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -26,13 +26,13 @@ public class SmsBondOp implements Serializable {
     private OpState state;
 
     @Column(name = "dt")
-    private ZonedDateTime dt;
+    private Instant dt;
 
     @Column(name = "bytes")
     private String bytes;
 
     @Column(name = "written_dt")
-    private ZonedDateTime writtenDt;
+    private Instant writtenDt;
 
     @Column(name = "written_bytes")
     private String writtenBytes;
@@ -59,16 +59,16 @@ public class SmsBondOp implements Serializable {
         this.state = state;
     }
 
-    public ZonedDateTime getDt() {
+    public Instant getDt() {
         return dt;
     }
 
-    public SmsBondOp dt(ZonedDateTime dt) {
+    public SmsBondOp dt(Instant dt) {
         this.dt = dt;
         return this;
     }
 
-    public void setDt(ZonedDateTime dt) {
+    public void setDt(Instant dt) {
         this.dt = dt;
     }
 
@@ -85,16 +85,16 @@ public class SmsBondOp implements Serializable {
         this.bytes = bytes;
     }
 
-    public ZonedDateTime getWrittenDt() {
+    public Instant getWrittenDt() {
         return writtenDt;
     }
 
-    public SmsBondOp writtenDt(ZonedDateTime writtenDt) {
+    public SmsBondOp writtenDt(Instant writtenDt) {
         this.writtenDt = writtenDt;
         return this;
     }
 
-    public void setWrittenDt(ZonedDateTime writtenDt) {
+    public void setWrittenDt(Instant writtenDt) {
         this.writtenDt = writtenDt;
     }
 

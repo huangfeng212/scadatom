@@ -28,13 +28,10 @@ import org.springframework.validation.Validator;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.ZoneOffset;
-import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
-import static io.scadatom.electron.web.rest.TestUtil.sameInstant;
 import static io.scadatom.electron.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -53,8 +50,8 @@ public class SmmBondOpResourceIntTest {
     private static final OpState DEFAULT_STATE = OpState.Uninitialized;
     private static final OpState UPDATED_STATE = OpState.Initialized;
 
-    private static final ZonedDateTime DEFAULT_DT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_DT = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_DT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_DT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final SmmPollStatus DEFAULT_POLL_STATUS = SmmPollStatus.NA;
     private static final SmmPollStatus UPDATED_POLL_STATUS = SmmPollStatus.Normal;
@@ -71,8 +68,8 @@ public class SmmBondOpResourceIntTest {
     private static final String DEFAULT_WRITE_RESPONSE = "AAAAAAAAAA";
     private static final String UPDATED_WRITE_RESPONSE = "BBBBBBBBBB";
 
-    private static final ZonedDateTime DEFAULT_WRITE_REQUEST_DT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_WRITE_REQUEST_DT = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_WRITE_REQUEST_DT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_WRITE_REQUEST_DT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     @Autowired
     private SmmBondOpRepository smmBondOpRepository;
@@ -196,13 +193,13 @@ public class SmmBondOpResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(smmBondOp.getId().intValue())))
             .andExpect(jsonPath("$.[*].state").value(hasItem(DEFAULT_STATE.toString())))
-            .andExpect(jsonPath("$.[*].dt").value(hasItem(sameInstant(DEFAULT_DT))))
+            .andExpect(jsonPath("$.[*].dt").value(hasItem(DEFAULT_DT.toString())))
             .andExpect(jsonPath("$.[*].pollStatus").value(hasItem(DEFAULT_POLL_STATUS.toString())))
             .andExpect(jsonPath("$.[*].readRequest").value(hasItem(DEFAULT_READ_REQUEST.toString())))
             .andExpect(jsonPath("$.[*].readResponse").value(hasItem(DEFAULT_READ_RESPONSE.toString())))
             .andExpect(jsonPath("$.[*].writeRequest").value(hasItem(DEFAULT_WRITE_REQUEST.toString())))
             .andExpect(jsonPath("$.[*].writeResponse").value(hasItem(DEFAULT_WRITE_RESPONSE.toString())))
-            .andExpect(jsonPath("$.[*].writeRequestDt").value(hasItem(sameInstant(DEFAULT_WRITE_REQUEST_DT))));
+            .andExpect(jsonPath("$.[*].writeRequestDt").value(hasItem(DEFAULT_WRITE_REQUEST_DT.toString())));
     }
     
     @Test
@@ -217,13 +214,13 @@ public class SmmBondOpResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(smmBondOp.getId().intValue()))
             .andExpect(jsonPath("$.state").value(DEFAULT_STATE.toString()))
-            .andExpect(jsonPath("$.dt").value(sameInstant(DEFAULT_DT)))
+            .andExpect(jsonPath("$.dt").value(DEFAULT_DT.toString()))
             .andExpect(jsonPath("$.pollStatus").value(DEFAULT_POLL_STATUS.toString()))
             .andExpect(jsonPath("$.readRequest").value(DEFAULT_READ_REQUEST.toString()))
             .andExpect(jsonPath("$.readResponse").value(DEFAULT_READ_RESPONSE.toString()))
             .andExpect(jsonPath("$.writeRequest").value(DEFAULT_WRITE_REQUEST.toString()))
             .andExpect(jsonPath("$.writeResponse").value(DEFAULT_WRITE_RESPONSE.toString()))
-            .andExpect(jsonPath("$.writeRequestDt").value(sameInstant(DEFAULT_WRITE_REQUEST_DT)));
+            .andExpect(jsonPath("$.writeRequestDt").value(DEFAULT_WRITE_REQUEST_DT.toString()));
     }
 
     @Test

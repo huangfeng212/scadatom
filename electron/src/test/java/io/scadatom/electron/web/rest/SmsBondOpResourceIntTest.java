@@ -27,13 +27,10 @@ import org.springframework.validation.Validator;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.ZoneOffset;
-import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
-import static io.scadatom.electron.web.rest.TestUtil.sameInstant;
 import static io.scadatom.electron.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -52,14 +49,14 @@ public class SmsBondOpResourceIntTest {
     private static final OpState DEFAULT_STATE = OpState.Uninitialized;
     private static final OpState UPDATED_STATE = OpState.Initialized;
 
-    private static final ZonedDateTime DEFAULT_DT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_DT = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_DT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_DT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String DEFAULT_BYTES = "AAAAAAAAAA";
     private static final String UPDATED_BYTES = "BBBBBBBBBB";
 
-    private static final ZonedDateTime DEFAULT_WRITTEN_DT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_WRITTEN_DT = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_WRITTEN_DT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_WRITTEN_DT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String DEFAULT_WRITTEN_BYTES = "AAAAAAAAAA";
     private static final String UPDATED_WRITTEN_BYTES = "BBBBBBBBBB";
@@ -180,9 +177,9 @@ public class SmsBondOpResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(smsBondOp.getId().intValue())))
             .andExpect(jsonPath("$.[*].state").value(hasItem(DEFAULT_STATE.toString())))
-            .andExpect(jsonPath("$.[*].dt").value(hasItem(sameInstant(DEFAULT_DT))))
+            .andExpect(jsonPath("$.[*].dt").value(hasItem(DEFAULT_DT.toString())))
             .andExpect(jsonPath("$.[*].bytes").value(hasItem(DEFAULT_BYTES.toString())))
-            .andExpect(jsonPath("$.[*].writtenDt").value(hasItem(sameInstant(DEFAULT_WRITTEN_DT))))
+            .andExpect(jsonPath("$.[*].writtenDt").value(hasItem(DEFAULT_WRITTEN_DT.toString())))
             .andExpect(jsonPath("$.[*].writtenBytes").value(hasItem(DEFAULT_WRITTEN_BYTES.toString())));
     }
     
@@ -198,9 +195,9 @@ public class SmsBondOpResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(smsBondOp.getId().intValue()))
             .andExpect(jsonPath("$.state").value(DEFAULT_STATE.toString()))
-            .andExpect(jsonPath("$.dt").value(sameInstant(DEFAULT_DT)))
+            .andExpect(jsonPath("$.dt").value(DEFAULT_DT.toString()))
             .andExpect(jsonPath("$.bytes").value(DEFAULT_BYTES.toString()))
-            .andExpect(jsonPath("$.writtenDt").value(sameInstant(DEFAULT_WRITTEN_DT)))
+            .andExpect(jsonPath("$.writtenDt").value(DEFAULT_WRITTEN_DT.toString()))
             .andExpect(jsonPath("$.writtenBytes").value(DEFAULT_WRITTEN_BYTES.toString()));
     }
 

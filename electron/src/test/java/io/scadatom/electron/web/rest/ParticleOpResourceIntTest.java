@@ -27,13 +27,10 @@ import org.springframework.validation.Validator;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.ZoneOffset;
-import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
-import static io.scadatom.electron.web.rest.TestUtil.sameInstant;
 import static io.scadatom.electron.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -52,8 +49,8 @@ public class ParticleOpResourceIntTest {
     private static final OpState DEFAULT_STATE = OpState.Uninitialized;
     private static final OpState UPDATED_STATE = OpState.Initialized;
 
-    private static final ZonedDateTime DEFAULT_DT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_DT = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_DT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_DT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String DEFAULT_VALUE = "AAAAAAAAAA";
     private static final String UPDATED_VALUE = "BBBBBBBBBB";
@@ -61,8 +58,8 @@ public class ParticleOpResourceIntTest {
     private static final String DEFAULT_WRITTEN_BY = "AAAAAAAAAA";
     private static final String UPDATED_WRITTEN_BY = "BBBBBBBBBB";
 
-    private static final ZonedDateTime DEFAULT_WRITTEN_DT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_WRITTEN_DT = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_WRITTEN_DT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_WRITTEN_DT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     @Autowired
     private ParticleOpRepository particleOpRepository;
@@ -180,10 +177,10 @@ public class ParticleOpResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(particleOp.getId().intValue())))
             .andExpect(jsonPath("$.[*].state").value(hasItem(DEFAULT_STATE.toString())))
-            .andExpect(jsonPath("$.[*].dt").value(hasItem(sameInstant(DEFAULT_DT))))
+            .andExpect(jsonPath("$.[*].dt").value(hasItem(DEFAULT_DT.toString())))
             .andExpect(jsonPath("$.[*].value").value(hasItem(DEFAULT_VALUE.toString())))
             .andExpect(jsonPath("$.[*].writtenBy").value(hasItem(DEFAULT_WRITTEN_BY.toString())))
-            .andExpect(jsonPath("$.[*].writtenDt").value(hasItem(sameInstant(DEFAULT_WRITTEN_DT))));
+            .andExpect(jsonPath("$.[*].writtenDt").value(hasItem(DEFAULT_WRITTEN_DT.toString())));
     }
     
     @Test
@@ -198,10 +195,10 @@ public class ParticleOpResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(particleOp.getId().intValue()))
             .andExpect(jsonPath("$.state").value(DEFAULT_STATE.toString()))
-            .andExpect(jsonPath("$.dt").value(sameInstant(DEFAULT_DT)))
+            .andExpect(jsonPath("$.dt").value(DEFAULT_DT.toString()))
             .andExpect(jsonPath("$.value").value(DEFAULT_VALUE.toString()))
             .andExpect(jsonPath("$.writtenBy").value(DEFAULT_WRITTEN_BY.toString()))
-            .andExpect(jsonPath("$.writtenDt").value(sameInstant(DEFAULT_WRITTEN_DT)));
+            .andExpect(jsonPath("$.writtenDt").value(DEFAULT_WRITTEN_DT.toString()));
     }
 
     @Test

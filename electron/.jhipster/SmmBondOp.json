@@ -8,7 +8,7 @@
         },
         {
             "fieldName": "dt",
-            "fieldType": "ZonedDateTime"
+            "fieldType": "Instant"
         },
         {
             "fieldName": "pollStatus",
@@ -33,7 +33,7 @@
         },
         {
             "fieldName": "writeRequestDt",
-            "fieldType": "ZonedDateTime"
+            "fieldType": "Instant"
         }
     ],
     "relationships": [],

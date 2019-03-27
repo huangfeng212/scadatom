@@ -1,7 +1,7 @@
 package io.scadatom.neutron;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -9,96 +9,97 @@ import java.util.Objects;
  */
 public class SmsBondOpDTO implements Serializable {
 
-  private Long id;
+    private Long id;
 
-  private OpState state;
+    private OpState state;
 
-  private ZonedDateTime dt;
+    private Instant dt;
 
-  private String bytes;
+    private String bytes;
 
-  private ZonedDateTime writtenDt;
+    private Instant writtenDt;
 
-  private String writtenBytes;
+    private String writtenBytes;
 
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getId());
-  }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public Long getId() {
+        return id;
     }
 
-    SmsBondOpDTO smsBondOpDTO = (SmsBondOpDTO) o;
-    if (smsBondOpDTO.getId() == null || getId() == null) {
-      return false;
+    public void setId(Long id) {
+        this.id = id;
     }
-    return Objects.equals(getId(), smsBondOpDTO.getId());
-  }
 
-  public Long getId() {
-    return id;
-  }
+    public OpState getState() {
+        return state;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setState(OpState state) {
+        this.state = state;
+    }
 
-  @Override
-  public String toString() {
-    return "SmsBondOpDTO{" +
-        "id=" + getId() +
-        ", state='" + getState() + "'" +
-        ", dt='" + getDt() + "'" +
-        ", bytes='" + getBytes() + "'" +
-        ", writtenDt='" + getWrittenDt() + "'" +
-        ", writtenBytes='" + getWrittenBytes() + "'" +
-        "}";
-  }
+    public Instant getDt() {
+        return dt;
+    }
 
-  public OpState getState() {
-    return state;
-  }
+    public void setDt(Instant dt) {
+        this.dt = dt;
+    }
 
-  public void setState(OpState state) {
-    this.state = state;
-  }
+    public String getBytes() {
+        return bytes;
+    }
 
-  public ZonedDateTime getDt() {
-    return dt;
-  }
+    public void setBytes(String bytes) {
+        this.bytes = bytes;
+    }
 
-  public void setDt(ZonedDateTime dt) {
-    this.dt = dt;
-  }
+    public Instant getWrittenDt() {
+        return writtenDt;
+    }
 
-  public String getBytes() {
-    return bytes;
-  }
+    public void setWrittenDt(Instant writtenDt) {
+        this.writtenDt = writtenDt;
+    }
 
-  public void setBytes(String bytes) {
-    this.bytes = bytes;
-  }
+    public String getWrittenBytes() {
+        return writtenBytes;
+    }
 
-  public ZonedDateTime getWrittenDt() {
-    return writtenDt;
-  }
+    public void setWrittenBytes(String writtenBytes) {
+        this.writtenBytes = writtenBytes;
+    }
 
-  public void setWrittenDt(ZonedDateTime writtenDt) {
-    this.writtenDt = writtenDt;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-  public String getWrittenBytes() {
-    return writtenBytes;
-  }
+        SmsBondOpDTO smsBondOpDTO = (SmsBondOpDTO) o;
+        if (smsBondOpDTO.getId() == null || getId() == null) {
+            return false;
+        }
+        return Objects.equals(getId(), smsBondOpDTO.getId());
+    }
 
-  public void setWrittenBytes(String writtenBytes) {
-    this.writtenBytes = writtenBytes;
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
+    @Override
+    public String toString() {
+        return "SmsBondOpDTO{" +
+            "id=" + getId() +
+            ", state='" + getState() + "'" +
+            ", dt='" + getDt() + "'" +
+            ", bytes='" + getBytes() + "'" +
+            ", writtenDt='" + getWrittenDt() + "'" +
+            ", writtenBytes='" + getWrittenBytes() + "'" +
+            "}";
+    }
 }

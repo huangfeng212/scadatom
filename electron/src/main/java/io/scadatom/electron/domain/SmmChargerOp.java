@@ -1,102 +1,96 @@
 package io.scadatom.electron.domain;
 
-import io.scadatom.neutron.OpState;
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
-/** A SmmChargerOp. */
+
+import io.scadatom.neutron.OpState;
+import javax.persistence.*;
+
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
+
+/**
+ * A SmmChargerOp.
+ */
 @Entity
 @Table(name = "smm_charger_op")
 public class SmmChargerOp implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-
+    private static final long serialVersionUID = 1L;
+    
   @Id private Long id;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "state")
-  private OpState state;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state")
+    private OpState state;
 
-  @Column(name = "dt")
-  private ZonedDateTime dt;
+    @Column(name = "dt")
+    private Instant dt;
 
-  public SmmChargerOp state(OpState state) {
-    this.state = state;
-    return this;
-  }
-
-  public SmmChargerOp dt(ZonedDateTime dt) {
-    this.dt = dt;
-    return this;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getId());
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
+    public Long getId() {
+        return id;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public void setId(Long id) {
+        this.id = id;
     }
-    SmmChargerOp smmChargerOp = (SmmChargerOp) o;
-    if (smmChargerOp.getId() == null || getId() == null) {
-      return false;
+
+    public OpState getState() {
+        return state;
     }
-    return Objects.equals(getId(), smmChargerOp.getId());
-  }
 
-  // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
-  public Long getId() {
-    return id;
-  }
+    public SmmChargerOp state(OpState state) {
+        this.state = state;
+        return this;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setState(OpState state) {
+        this.state = state;
+    }
 
-  @Override
-  public String toString() {
-    return "SmmChargerOp{"
-        + "id="
-        + getId()
-        + ", state='"
-        + getState()
-        + "'"
-        + ", dt='"
-        + getDt()
-        + "'"
-        + "}";
-  }
+    public Instant getDt() {
+        return dt;
+    }
 
-  public OpState getState() {
-    return state;
-  }
-  // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not
-  // remove
+    public SmmChargerOp dt(Instant dt) {
+        this.dt = dt;
+        return this;
+    }
 
-  public void setState(OpState state) {
-    this.state = state;
-  }
+    public void setDt(Instant dt) {
+        this.dt = dt;
+    }
+    // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
-  public ZonedDateTime getDt() {
-    return dt;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SmmChargerOp smmChargerOp = (SmmChargerOp) o;
+        if (smmChargerOp.getId() == null || getId() == null) {
+            return false;
+        }
+        return Objects.equals(getId(), smmChargerOp.getId());
+    }
 
-  public void setDt(ZonedDateTime dt) {
-    this.dt = dt;
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
+    @Override
+    public String toString() {
+        return "SmmChargerOp{" +
+            "id=" + getId() +
+            ", state='" + getState() + "'" +
+            ", dt='" + getDt() + "'" +
+            "}";
+    }
     public SmmChargerOp id(long id) {
         setId(id);
         return this;

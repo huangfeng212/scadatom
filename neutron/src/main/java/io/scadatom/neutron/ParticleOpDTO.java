@@ -1,7 +1,7 @@
 package io.scadatom.neutron;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -9,96 +9,97 @@ import java.util.Objects;
  */
 public class ParticleOpDTO implements Serializable {
 
-  private Long id;
+    private Long id;
 
-  private OpState state;
+    private OpState state;
 
-  private ZonedDateTime dt;
+    private Instant dt;
 
-  private String value;
+    private String value;
 
-  private String writtenBy;
+    private String writtenBy;
 
-  private ZonedDateTime writtenDt;
+    private Instant writtenDt;
 
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getId());
-  }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public Long getId() {
+        return id;
     }
 
-    ParticleOpDTO particleOpDTO = (ParticleOpDTO) o;
-    if (particleOpDTO.getId() == null || getId() == null) {
-      return false;
+    public void setId(Long id) {
+        this.id = id;
     }
-    return Objects.equals(getId(), particleOpDTO.getId());
-  }
 
-  public Long getId() {
-    return id;
-  }
+    public OpState getState() {
+        return state;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setState(OpState state) {
+        this.state = state;
+    }
 
-  @Override
-  public String toString() {
-    return "ParticleOpDTO{" +
-        "id=" + getId() +
-        ", state='" + getState() + "'" +
-        ", dt='" + getDt() + "'" +
-        ", value='" + getValue() + "'" +
-        ", writtenBy='" + getWrittenBy() + "'" +
-        ", writtenDt='" + getWrittenDt() + "'" +
-        "}";
-  }
+    public Instant getDt() {
+        return dt;
+    }
 
-  public OpState getState() {
-    return state;
-  }
+    public void setDt(Instant dt) {
+        this.dt = dt;
+    }
 
-  public void setState(OpState state) {
-    this.state = state;
-  }
+    public String getValue() {
+        return value;
+    }
 
-  public ZonedDateTime getDt() {
-    return dt;
-  }
+    public void setValue(String value) {
+        this.value = value;
+    }
 
-  public void setDt(ZonedDateTime dt) {
-    this.dt = dt;
-  }
+    public String getWrittenBy() {
+        return writtenBy;
+    }
 
-  public String getValue() {
-    return value;
-  }
+    public void setWrittenBy(String writtenBy) {
+        this.writtenBy = writtenBy;
+    }
 
-  public void setValue(String value) {
-    this.value = value;
-  }
+    public Instant getWrittenDt() {
+        return writtenDt;
+    }
 
-  public String getWrittenBy() {
-    return writtenBy;
-  }
+    public void setWrittenDt(Instant writtenDt) {
+        this.writtenDt = writtenDt;
+    }
 
-  public void setWrittenBy(String writtenBy) {
-    this.writtenBy = writtenBy;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-  public ZonedDateTime getWrittenDt() {
-    return writtenDt;
-  }
+        ParticleOpDTO particleOpDTO = (ParticleOpDTO) o;
+        if (particleOpDTO.getId() == null || getId() == null) {
+            return false;
+        }
+        return Objects.equals(getId(), particleOpDTO.getId());
+    }
 
-  public void setWrittenDt(ZonedDateTime writtenDt) {
-    this.writtenDt = writtenDt;
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
+    @Override
+    public String toString() {
+        return "ParticleOpDTO{" +
+            "id=" + getId() +
+            ", state='" + getState() + "'" +
+            ", dt='" + getDt() + "'" +
+            ", value='" + getValue() + "'" +
+            ", writtenBy='" + getWrittenBy() + "'" +
+            ", writtenDt='" + getWrittenDt() + "'" +
+            "}";
+    }
 }

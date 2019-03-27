@@ -1,7 +1,7 @@
 package io.scadatom.neutron;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -13,7 +13,7 @@ public class SmmDeviceOpDTO implements Serializable {
 
     private OpState state;
 
-    private ZonedDateTime dt;
+    private Instant dt;
 
 
     public Long getId() {
@@ -32,11 +32,11 @@ public class SmmDeviceOpDTO implements Serializable {
         this.state = state;
     }
 
-    public ZonedDateTime getDt() {
+    public Instant getDt() {
         return dt;
     }
 
-    public void setDt(ZonedDateTime dt) {
+    public void setDt(Instant dt) {
         this.dt = dt;
     }
 

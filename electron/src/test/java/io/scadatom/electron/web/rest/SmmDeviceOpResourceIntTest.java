@@ -27,13 +27,10 @@ import org.springframework.validation.Validator;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.time.ZonedDateTime;
-import java.time.ZoneOffset;
-import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
-import static io.scadatom.electron.web.rest.TestUtil.sameInstant;
 import static io.scadatom.electron.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -52,8 +49,8 @@ public class SmmDeviceOpResourceIntTest {
     private static final OpState DEFAULT_STATE = OpState.Uninitialized;
     private static final OpState UPDATED_STATE = OpState.Initialized;
 
-    private static final ZonedDateTime DEFAULT_DT = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
-    private static final ZonedDateTime UPDATED_DT = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+    private static final Instant DEFAULT_DT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_DT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     @Autowired
     private SmmDeviceOpRepository smmDeviceOpRepository;
@@ -165,7 +162,7 @@ public class SmmDeviceOpResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(smmDeviceOp.getId().intValue())))
             .andExpect(jsonPath("$.[*].state").value(hasItem(DEFAULT_STATE.toString())))
-            .andExpect(jsonPath("$.[*].dt").value(hasItem(sameInstant(DEFAULT_DT))));
+            .andExpect(jsonPath("$.[*].dt").value(hasItem(DEFAULT_DT.toString())));
     }
     
     @Test
@@ -180,7 +177,7 @@ public class SmmDeviceOpResourceIntTest {
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(smmDeviceOp.getId().intValue()))
             .andExpect(jsonPath("$.state").value(DEFAULT_STATE.toString()))
-            .andExpect(jsonPath("$.dt").value(sameInstant(DEFAULT_DT)));
+            .andExpect(jsonPath("$.dt").value(DEFAULT_DT.toString()));
     }
 
     @Test

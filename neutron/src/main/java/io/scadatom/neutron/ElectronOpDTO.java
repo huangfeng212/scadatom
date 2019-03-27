@@ -1,7 +1,7 @@
 package io.scadatom.neutron;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -9,63 +9,64 @@ import java.util.Objects;
  */
 public class ElectronOpDTO implements Serializable {
 
-  private Long id;
+    private Long id;
 
-  private OpState state;
+    private OpState state;
 
-  private ZonedDateTime dt;
+    private Instant dt;
 
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getId());
-  }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public Long getId() {
+        return id;
     }
 
-    ElectronOpDTO electronOpDTO = (ElectronOpDTO) o;
-    if (electronOpDTO.getId() == null || getId() == null) {
-      return false;
+    public void setId(Long id) {
+        this.id = id;
     }
-    return Objects.equals(getId(), electronOpDTO.getId());
-  }
 
-  public Long getId() {
-    return id;
-  }
+    public OpState getState() {
+        return state;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setState(OpState state) {
+        this.state = state;
+    }
 
-  @Override
-  public String toString() {
-    return "ElectronOpDTO{" +
-        "id=" + getId() +
-        ", state='" + getState() + "'" +
-        ", dt='" + getDt() + "'" +
-        "}";
-  }
+    public Instant getDt() {
+        return dt;
+    }
 
-  public OpState getState() {
-    return state;
-  }
+    public void setDt(Instant dt) {
+        this.dt = dt;
+    }
 
-  public void setState(OpState state) {
-    this.state = state;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-  public ZonedDateTime getDt() {
-    return dt;
-  }
+        ElectronOpDTO electronOpDTO = (ElectronOpDTO) o;
+        if (electronOpDTO.getId() == null || getId() == null) {
+            return false;
+        }
+        return Objects.equals(getId(), electronOpDTO.getId());
+    }
 
-  public void setDt(ZonedDateTime dt) {
-    this.dt = dt;
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
+    @Override
+    public String toString() {
+        return "ElectronOpDTO{" +
+            "id=" + getId() +
+            ", state='" + getState() + "'" +
+            ", dt='" + getDt() + "'" +
+            "}";
+    }
 }

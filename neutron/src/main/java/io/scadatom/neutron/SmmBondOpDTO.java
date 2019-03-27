@@ -1,7 +1,7 @@
 package io.scadatom.neutron;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -9,129 +9,130 @@ import java.util.Objects;
  */
 public class SmmBondOpDTO implements Serializable {
 
-  private Long id;
+    private Long id;
 
-  private OpState state;
+    private OpState state;
 
-  private ZonedDateTime dt;
+    private Instant dt;
 
-  private SmmPollStatus pollStatus;
+    private SmmPollStatus pollStatus;
 
-  private String readRequest;
+    private String readRequest;
 
-  private String readResponse;
+    private String readResponse;
 
-  private String writeRequest;
+    private String writeRequest;
 
-  private String writeResponse;
+    private String writeResponse;
 
-  private ZonedDateTime writeRequestDt;
+    private Instant writeRequestDt;
 
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getId());
-  }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+    public Long getId() {
+        return id;
     }
 
-    SmmBondOpDTO smmBondOpDTO = (SmmBondOpDTO) o;
-    if (smmBondOpDTO.getId() == null || getId() == null) {
-      return false;
+    public void setId(Long id) {
+        this.id = id;
     }
-    return Objects.equals(getId(), smmBondOpDTO.getId());
-  }
 
-  public Long getId() {
-    return id;
-  }
+    public OpState getState() {
+        return state;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setState(OpState state) {
+        this.state = state;
+    }
 
-  @Override
-  public String toString() {
-    return "SmmBondOpDTO{" +
-        "id=" + getId() +
-        ", state='" + getState() + "'" +
-        ", dt='" + getDt() + "'" +
-        ", pollStatus='" + getPollStatus() + "'" +
-        ", readRequest='" + getReadRequest() + "'" +
-        ", readResponse='" + getReadResponse() + "'" +
-        ", writeRequest='" + getWriteRequest() + "'" +
-        ", writeResponse='" + getWriteResponse() + "'" +
-        ", writeRequestDt='" + getWriteRequestDt() + "'" +
-        "}";
-  }
+    public Instant getDt() {
+        return dt;
+    }
 
-  public OpState getState() {
-    return state;
-  }
+    public void setDt(Instant dt) {
+        this.dt = dt;
+    }
 
-  public void setState(OpState state) {
-    this.state = state;
-  }
+    public SmmPollStatus getPollStatus() {
+        return pollStatus;
+    }
 
-  public ZonedDateTime getDt() {
-    return dt;
-  }
+    public void setPollStatus(SmmPollStatus pollStatus) {
+        this.pollStatus = pollStatus;
+    }
 
-  public void setDt(ZonedDateTime dt) {
-    this.dt = dt;
-  }
+    public String getReadRequest() {
+        return readRequest;
+    }
 
-  public SmmPollStatus getPollStatus() {
-    return pollStatus;
-  }
+    public void setReadRequest(String readRequest) {
+        this.readRequest = readRequest;
+    }
 
-  public void setPollStatus(SmmPollStatus pollStatus) {
-    this.pollStatus = pollStatus;
-  }
+    public String getReadResponse() {
+        return readResponse;
+    }
 
-  public String getReadRequest() {
-    return readRequest;
-  }
+    public void setReadResponse(String readResponse) {
+        this.readResponse = readResponse;
+    }
 
-  public void setReadRequest(String readRequest) {
-    this.readRequest = readRequest;
-  }
+    public String getWriteRequest() {
+        return writeRequest;
+    }
 
-  public String getReadResponse() {
-    return readResponse;
-  }
+    public void setWriteRequest(String writeRequest) {
+        this.writeRequest = writeRequest;
+    }
 
-  public void setReadResponse(String readResponse) {
-    this.readResponse = readResponse;
-  }
+    public String getWriteResponse() {
+        return writeResponse;
+    }
 
-  public String getWriteRequest() {
-    return writeRequest;
-  }
+    public void setWriteResponse(String writeResponse) {
+        this.writeResponse = writeResponse;
+    }
 
-  public void setWriteRequest(String writeRequest) {
-    this.writeRequest = writeRequest;
-  }
+    public Instant getWriteRequestDt() {
+        return writeRequestDt;
+    }
 
-  public String getWriteResponse() {
-    return writeResponse;
-  }
+    public void setWriteRequestDt(Instant writeRequestDt) {
+        this.writeRequestDt = writeRequestDt;
+    }
 
-  public void setWriteResponse(String writeResponse) {
-    this.writeResponse = writeResponse;
-  }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-  public ZonedDateTime getWriteRequestDt() {
-    return writeRequestDt;
-  }
+        SmmBondOpDTO smmBondOpDTO = (SmmBondOpDTO) o;
+        if (smmBondOpDTO.getId() == null || getId() == null) {
+            return false;
+        }
+        return Objects.equals(getId(), smmBondOpDTO.getId());
+    }
 
-  public void setWriteRequestDt(ZonedDateTime writeRequestDt) {
-    this.writeRequestDt = writeRequestDt;
-  }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
+    @Override
+    public String toString() {
+        return "SmmBondOpDTO{" +
+            "id=" + getId() +
+            ", state='" + getState() + "'" +
+            ", dt='" + getDt() + "'" +
+            ", pollStatus='" + getPollStatus() + "'" +
+            ", readRequest='" + getReadRequest() + "'" +
+            ", readResponse='" + getReadResponse() + "'" +
+            ", writeRequest='" + getWriteRequest() + "'" +
+            ", writeResponse='" + getWriteResponse() + "'" +
+            ", writeRequestDt='" + getWriteRequestDt() + "'" +
+            "}";
+    }
 }

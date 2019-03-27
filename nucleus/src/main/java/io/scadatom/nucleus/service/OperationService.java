@@ -190,8 +190,7 @@ public class OperationService {
                             .user(
                                 SecurityContextHolder.getContext()
                                     .getAuthentication()
-                                    .getPrincipal()
-                                    .toString()))
+                                    .getName()))
                     .flat());
         parseResp(resp, Void.class);
       } catch (JsonProcessingException e) {
@@ -238,8 +237,7 @@ public class OperationService {
                             .user(
                                 SecurityContextHolder.getContext()
                                     .getAuthentication()
-                                    .getPrincipal()
-                                    .toString()))
+                                    .getName()))
                     .flat());
         parseResp(resp, Void.class);
       } catch (JsonProcessingException e) {

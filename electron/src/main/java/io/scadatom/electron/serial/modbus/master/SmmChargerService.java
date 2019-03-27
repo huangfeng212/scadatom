@@ -25,7 +25,7 @@ import io.scadatom.neutron.SmmPollStatus;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
@@ -292,7 +292,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                     smmBondOp -> {
                       smmBondOp.setWriteRequest(smmBondOperation.getWriteRequest().getHexMessage());
                       smmBondOp.setWriteResponse(finalModbusResponse.getHexMessage());
-                      smmBondOp.setWriteRequestDt(ZonedDateTime.now());
+                      smmBondOp.setWriteRequestDt(Instant.now());
                     });
               } catch (ModbusException e) {
                 // ignore, don't care

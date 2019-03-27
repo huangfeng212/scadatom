@@ -292,12 +292,13 @@ public class OperationService {
     }
     // apply init values
     config.getParticleDTOS().stream()
-        .filter(particle -> !StringUtils.isBlank(particle.getInitValue()))
         .forEach(
             particle -> {
-              opChangeService.onCommandWritten(
-                  particle.getId(), particle.getInitValue(), INIT_VALUE);
-              opChangeService.onValueRead(particle.getId(), particle.getInitValue(), INIT_VALUE);
+              if (!StringUtils.isBlank(particle.getInitValue())) {
+                opChangeService.onCommandWritten(
+                    particle.getId(), particle.getInitValue(), INIT_VALUE);
+                opChangeService.onValueRead(particle.getId(), particle.getInitValue(), INIT_VALUE);
+              }
               opDataService.updateParticleOp(
                   particle.getId(),
                   particleOp -> {

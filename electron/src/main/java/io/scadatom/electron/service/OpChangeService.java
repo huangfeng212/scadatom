@@ -3,7 +3,7 @@ package io.scadatom.electron.service;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import io.scadatom.electron.domain.ParticleOp;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,7 +36,7 @@ public class OpChangeService {
             particleOp -> {
               particleOp.setValue(newValue);
               particleOp.setWrittenBy(source);
-              particleOp.setWrittenDt(ZonedDateTime.now());
+              particleOp.setWrittenDt(Instant.now());
             });
     log.debug("valueRead: {}", updateParticleOp);
     notifyValueChange(particleId, newValue);
@@ -54,7 +54,7 @@ public class OpChangeService {
         particleId,
         particleOp -> {
           particleOp.setWrittenBy(source);
-          particleOp.setWrittenDt(ZonedDateTime.now());
+          particleOp.setWrittenDt(Instant.now());
         });
     notifyCommandWritten(particleId, newCommand);
     // decide whether to accept the command, now it is always consent

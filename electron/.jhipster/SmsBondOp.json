@@ -8,7 +8,7 @@
         },
         {
             "fieldName": "dt",
-            "fieldType": "ZonedDateTime"
+            "fieldType": "Instant"
         },
         {
             "fieldName": "bytes",
@@ -16,7 +16,7 @@
         },
         {
             "fieldName": "writtenDt",
-            "fieldType": "ZonedDateTime"
+            "fieldType": "Instant"
         },
         {
             "fieldName": "writtenBytes",
