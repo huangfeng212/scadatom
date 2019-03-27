@@ -111,29 +111,41 @@ public class OperationService {
 
   private ElectronInitReq makeConfig(Electron electron) {
     ElectronInitReq electronInitReq = new ElectronInitReq();
+    // electron
     electronInitReq.setElectronDTO(electronMapper.toDto(electron));
+    // particles
     electronInitReq.setParticleDTOS(
         electron.getParticles().stream().map(particleMapper::toDto).collect(Collectors.toSet()));
-    electronInitReq.setSmmChargerDTO(smmChargerMapper.toDto(electron.getSmmCharger()));
-    electronInitReq.setSmmDeviceDTOS(
-        electron.getSmmCharger().getSmmDevices().stream()
-            .map(smmDeviceMapper::toDto)
-            .collect(Collectors.toSet()));
-    electronInitReq.setSmmBondDTOS(
-        electron.getSmmCharger().getSmmDevices().stream()
-            .flatMap(smmDevice -> smmDevice.getSmmBonds().stream())
-            .map(smmBondMapper::toDto)
-            .collect(Collectors.toSet()));
-    electronInitReq.setSmsChargerDTO(smsChargerMapper.toDto(electron.getSmsCharger()));
-    electronInitReq.setSmsDeviceDTOS(
-        electron.getSmsCharger().getSmsDevices().stream()
-            .map(smsDeviceMapper::toDto)
-            .collect(Collectors.toSet()));
-    electronInitReq.setSmsBondDTOS(
-        electron.getSmsCharger().getSmsDevices().stream()
-            .flatMap(smsDevice -> smsDevice.getSmsBonds().stream())
-            .map(smsBondMapper::toDto)
-            .collect(Collectors.toSet()));
+    // smm
+    Optional.ofNullable(electron.getSmmCharger())
+        .ifPresent(
+            smmCharger -> {
+              electronInitReq.setSmmChargerDTO(smmChargerMapper.toDto(smmCharger));
+              electronInitReq.setSmmDeviceDTOS(
+                  smmCharger.getSmmDevices().stream()
+                      .map(smmDeviceMapper::toDto)
+                      .collect(Collectors.toSet()));
+              electronInitReq.setSmmBondDTOS(
+                  smmCharger.getSmmDevices().stream()
+                      .flatMap(smmDevice -> smmDevice.getSmmBonds().stream())
+                      .map(smmBondMapper::toDto)
+                      .collect(Collectors.toSet()));
+            });
+    // sms
+    Optional.ofNullable(electron.getSmsCharger())
+        .ifPresent(
+            smsCharger -> {
+              electronInitReq.setSmsChargerDTO(smsChargerMapper.toDto(smsCharger));
+              electronInitReq.setSmsDeviceDTOS(
+                  smsCharger.getSmsDevices().stream()
+                      .map(smsDeviceMapper::toDto)
+                      .collect(Collectors.toSet()));
+              electronInitReq.setSmsBondDTOS(
+                  smsCharger.getSmsDevices().stream()
+                      .flatMap(smsDevice -> smsDevice.getSmsBonds().stream())
+                      .map(smsBondMapper::toDto)
+                      .collect(Collectors.toSet()));
+            });
     return electronInitReq;
   }
 
@@ -187,10 +199,7 @@ public class OperationService {
                         new OpCtrlReq()
                             .id(electron.getId())
                             .command(opCtrlReq.getCommand())
-                            .user(
-                                SecurityContextHolder.getContext()
-                                    .getAuthentication()
-                                    .getName()))
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName()))
                     .flat());
         parseResp(resp, Void.class);
       } catch (JsonProcessingException e) {
@@ -234,10 +243,7 @@ public class OperationService {
                         new OpCtrlReq()
                             .id(particle.getId())
                             .command(opCtrlReq.getCommand())
-                            .user(
-                                SecurityContextHolder.getContext()
-                                    .getAuthentication()
-                                    .getName()))
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName()))
                     .flat());
         parseResp(resp, Void.class);
       } catch (JsonProcessingException e) {

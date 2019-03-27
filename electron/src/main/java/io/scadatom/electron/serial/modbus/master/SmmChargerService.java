@@ -25,7 +25,6 @@ import io.scadatom.neutron.SmmPollStatus;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import javax.validation.constraints.NotNull;
@@ -89,9 +88,9 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
   @Override
   public void initialize(@NotNull ElectronInitReq config) {
     smmChargerDTO = config.getSmmChargerDTO();
-    if (smmChargerDTO == null) {
-      opDataService.updateSmmChargerOp(
-          smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Undefined));
+    if (smmChargerDTO == null) { // TODO can not ref null
+      //      opDataService.updateSmmChargerOp(
+      //          smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Undefined));
       return;
     }
     if (!smmChargerDTO.getEnabled()) {
@@ -216,12 +215,12 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
     return opDataService.getSmmChargerOp(smmChargerDTO.getId()).getState();
   }
 
-    @Override
-    public long getChargerId() {
-        return smmChargerDTO.getId();
-    }
+  @Override
+  public Long getChargerId() {
+    return smmChargerDTO == null ? null : smmChargerDTO.getId();
+  }
 
-    @Override
+  @Override
   public void run() {
     outerloop:
     while (updateFlag) {

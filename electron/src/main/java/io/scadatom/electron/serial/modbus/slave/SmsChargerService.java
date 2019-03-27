@@ -66,9 +66,9 @@ public class SmsChargerService extends AbstractChargerService {
   @Override
   public void initialize(ElectronInitReq config) {
     smsChargerDTO = config.getSmsChargerDTO();
-    if (smsChargerDTO == null) {
-      opDataService.updateSmsChargerOp(
-          smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Undefined));
+    if (smsChargerDTO == null) { // TODO can not ref null
+      //      opDataService.updateSmsChargerOp(
+      //          smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Undefined));
       return;
     }
     if (!smsChargerDTO.getEnabled()) {
@@ -160,8 +160,8 @@ public class SmsChargerService extends AbstractChargerService {
     return opDataService.getSmsChargerOp(smsChargerDTO.getId()).getState();
   }
 
-    @Override
-    public long getChargerId() {
-        return smsChargerDTO.getId();
-    }
+  @Override
+  public Long getChargerId() {
+    return smsChargerDTO == null ? null : smsChargerDTO.getId();
+  }
 }

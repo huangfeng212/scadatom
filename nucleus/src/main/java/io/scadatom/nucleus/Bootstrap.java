@@ -52,33 +52,21 @@ public class Bootstrap implements ApplicationRunner {
     smmChargerRepository.deleteAll();
     particleRepository.deleteAll();
     electronRepository.deleteAll();
-
+    // Electron 1 to test modbus
     Electron electron1 = electronRepository.save(new Electron().name("Electron 1"));
-    Particle particle1 =
+    Particle particle1_1 =
         particleRepository.save(
             new Particle()
-                .name("Particle 1")
+                .name("Particle 1_1")
                 .decimalFormat("0.0")
                 .initValue("0")
                 .electron(electron1));
-    Particle particle2 =
+    Particle particle1_2 =
         particleRepository.save(
             new Particle()
-                .name("Particle 2")
+                .name("Particle 1_2")
                 .decimalFormat("0.0")
                 .initValue("1.1")
-                .electron(electron1));
-    Particle particle3 =
-        particleRepository.save(
-            new Particle()
-                .name("Particle 3")
-                .decimalFormat("0.0")
-                .initValue("2.2")
-                .electron(electron1));
-    Particle particle4 =
-        particleRepository.save(
-            new Particle()
-                .name("Particle 4")
                 .electron(electron1));
     SmmCharger smmCharger1 =
         smmChargerRepository.save(
@@ -94,14 +82,14 @@ public class Bootstrap implements ApplicationRunner {
                 .timeout(200)
                 .transDelay(0)
                 .electron(electron1));
-    SmmDevice smmDevice1 =
+    SmmDevice smmDevice1_1 =
         smmDeviceRepository.save(
             new SmmDevice()
                 .address("0x1")
                 .enabled(true)
-                .name("SmmDevice 1")
+                .name("SmmDevice 1_1")
                 .smmCharger(smmCharger1));
-    SmmBond smmBond1 =
+    SmmBond smmBond1_1_1 =
         smmBondRepository.save(
             new SmmBond()
                 .enabled(true)
@@ -110,9 +98,9 @@ public class Bootstrap implements ApplicationRunner {
                 .valueType(ValueType.Int16)
                 .exprIn("0.1x")
                 .exprOut("10x")
-                .particle(particle1)
-                .smmDevice(smmDevice1));
-    SmmBond smmBond2 =
+                .particle(particle1_1)
+                .smmDevice(smmDevice1_1));
+    SmmBond smmBond1_1_2 =
         smmBondRepository.save(
             new SmmBond()
                 .enabled(true)
@@ -120,8 +108,8 @@ public class Bootstrap implements ApplicationRunner {
                 .regType(RegType.InputReg)
                 .valueType(ValueType.Int16)
                 .exprIn("0.1x")
-                .particle(particle2)
-                .smmDevice(smmDevice1));
+                .particle(particle1_2)
+                .smmDevice(smmDevice1_1));
     SmsCharger smsCharger1 =
         smsChargerRepository.save(
             new SmsCharger()
@@ -133,14 +121,14 @@ public class Bootstrap implements ApplicationRunner {
                 .stopbit(Stopbit.One)
                 .respDelay(0)
                 .electron(electron1));
-    SmsDevice smsDevice1 =
+    SmsDevice smsDevice1_1 =
         smsDeviceRepository.save(
             new SmsDevice()
-                .name("SmsDevice 1")
+                .name("SmsDevice 1_1")
                 .address("0x1")
                 .enabled(true)
                 .smsCharger(smsCharger1));
-    SmsBond smsBond1 =
+    SmsBond smsBond1_1_1 =
         smsBondRepository.save(
             new SmsBond()
                 .enabled(true)
@@ -149,9 +137,9 @@ public class Bootstrap implements ApplicationRunner {
                 .valueType(ValueType.Int16)
                 .exprIn("10x")
                 .exprOut("0.1x")
-                .particle(particle1)
-                .smsDevice(smsDevice1));
-    SmsBond smsBond2 =
+                .particle(particle1_1)
+                .smsDevice(smsDevice1_1));
+    SmsBond smsBond1_1_2 =
         smsBondRepository.save(
             new SmsBond()
                 .enabled(true)
@@ -159,7 +147,21 @@ public class Bootstrap implements ApplicationRunner {
                 .regType(RegType.InputReg)
                 .valueType(ValueType.Int16)
                 .exprIn("10x")
-                .particle(particle2)
-                .smsDevice(smsDevice1));
+                .particle(particle1_2)
+                .smsDevice(smsDevice1_1));
+                // Electron 2 to test no charger
+    Electron electron2 = electronRepository.save(new Electron().name("Electron 2"));
+    Particle particle2_1 =
+        particleRepository.save(
+            new Particle()
+                .name("Particle 2_1")
+                .initValue("Winter is coming")
+                .electron(electron2));
+    Particle particle2_2 =
+        particleRepository.save(
+            new Particle()
+                .name("Particle 2_2")
+                .initValue("You know nothing")
+                .electron(electron2));
   }
 }

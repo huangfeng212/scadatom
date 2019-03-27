@@ -14,5 +14,6 @@ public abstract class AbstractChargerService {
 
   public abstract OpState getState();
 
-  public abstract long getChargerId();
+  public abstract Long getChargerId();
+
 }

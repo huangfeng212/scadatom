@@ -221,29 +221,33 @@ public class OperationService {
       case Stopped:
       case Aborted:
         // onStart bond service
-        switch (smmChargerService.getState()) {
-          case Initialized:
-          case Aborted:
-          case Stopped:
-            try {
-              smmChargerService.start();
-            } catch (Exception e) {
-              opDataService.updateSmmChargerOp(
-                  smmChargerService.getChargerId(),
-                  smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
-            }
+        if (smmChargerService.getChargerId() != null) {
+          switch (smmChargerService.getState()) {
+            case Initialized:
+            case Aborted:
+            case Stopped:
+              try {
+                smmChargerService.start();
+              } catch (Exception e) {
+                opDataService.updateSmmChargerOp(
+                    smmChargerService.getChargerId(),
+                    smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
+              }
+          }
         }
-        switch (smsChargerService.getState()) {
-          case Initialized:
-          case Aborted:
-          case Stopped:
-            try {
-              smsChargerService.start();
-            } catch (Exception e) {
-              opDataService.updateSmsChargerOp(
-                  smsChargerService.getChargerId(),
-                  smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
-            }
+        if (smsChargerService.getChargerId() != null) {
+          switch (smsChargerService.getState()) {
+            case Initialized:
+            case Aborted:
+            case Stopped:
+              try {
+                smsChargerService.start();
+              } catch (Exception e) {
+                opDataService.updateSmsChargerOp(
+                    smsChargerService.getChargerId(),
+                    smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
+              }
+          }
         }
         opDataService.updateElectronOp(
             electronId, electronOp -> electronOp.setState(OpState.Started));
@@ -279,16 +283,20 @@ public class OperationService {
     try {
       smmChargerService.initialize(config);
     } catch (Exception e) {
-      opDataService.updateSmmChargerOp(
-          config.getSmmChargerDTO().getId(),
-          smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
+      if (config.getSmmChargerDTO() != null) {
+        opDataService.updateSmmChargerOp(
+            config.getSmmChargerDTO().getId(),
+            smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
+      }
     }
     try {
       smsChargerService.initialize(config);
     } catch (Exception e) {
-      opDataService.updateSmsChargerOp(
-          config.getSmsChargerDTO().getId(),
-          smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
+      if (config.getSmsChargerDTO() != null) {
+        opDataService.updateSmsChargerOp(
+            config.getSmsChargerDTO().getId(),
+            smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
+      }
     }
     // apply init values
     config.getParticleDTOS().stream()
