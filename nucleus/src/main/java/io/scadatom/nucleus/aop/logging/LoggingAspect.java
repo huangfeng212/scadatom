@@ -52,7 +52,7 @@ public class LoggingAspect {
    * @param joinPoint join point for advice
    * @param e exception
    */
-  @AfterThrowing(pointcut = "applicationPackagePointcut() && springBeanPointcut()", throwing = "e")
+  @AfterThrowing(pointcut = "applicationPackagePointcut() || springBeanPointcut()", throwing = "e")
   public void logAfterThrowing(JoinPoint joinPoint, Throwable e) {
     if (env.acceptsProfiles(JHipsterConstants.SPRING_PROFILE_DEVELOPMENT)) {
       log.error(
@@ -79,7 +79,7 @@ public class LoggingAspect {
    * @return result
    * @throws Throwable throws IllegalArgumentException
    */
-  @Around("applicationPackagePointcut() && springBeanPointcut()")
+  @Around("applicationPackagePointcut() || springBeanPointcut()")
   public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
     if (log.isDebugEnabled()) {
       log.debug(
