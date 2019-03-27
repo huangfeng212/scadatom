@@ -24,6 +24,7 @@ import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.FlattenedMessage;
 import io.scadatom.neutron.FlattenedMessageHandler;
 import io.scadatom.neutron.OpCtrlReq;
+import io.scadatom.neutron.OpException;
 import io.scadatom.neutron.OpState;
 import io.scadatom.neutron.OpViewReq;
 import java.io.IOException;
@@ -106,10 +107,8 @@ public class OperationService {
       onStart();
       return new FlattenedMessage(SUCCESS);
     } catch (IOException e) {
-      e.printStackTrace();
       return new FlattenedMessage(FAILURE + ":can not parse payload");
     } catch (Exception e) {
-      e.printStackTrace();
       return new FlattenedMessage(FAILURE + ":" + e.getMessage());
     }
   }
@@ -120,7 +119,7 @@ public class OperationService {
       return new FlattenedMessage(
           SUCCESS, electronOpMapper.toDto(opDataService.getElectronOp(opViewReq.getId())));
     } catch (IOException e) {
-      e.printStackTrace();
+
       return new FlattenedMessage(FAILURE + ":can not parse payload");
     }
   }
@@ -138,7 +137,6 @@ public class OperationService {
       }
       return new FlattenedMessage(SUCCESS);
     } catch (IOException e) {
-      e.printStackTrace();
       return new FlattenedMessage(FAILURE + ":can not parse payload");
     }
   }
@@ -149,7 +147,7 @@ public class OperationService {
       return new FlattenedMessage(
           SUCCESS, particleOpMapper.toDto(opDataService.getParticleOp(opViewReq.getId())));
     } catch (IOException e) {
-      e.printStackTrace();
+
       return new FlattenedMessage(FAILURE + ":can not parse or form message");
     }
   }
@@ -161,7 +159,6 @@ public class OperationService {
           opCtrlReq.getId(), opCtrlReq.getCommand(), "RemoteUser_" + opCtrlReq.getUser());
       return new FlattenedMessage(SUCCESS);
     } catch (IOException e) {
-      e.printStackTrace();
       return new FlattenedMessage(FAILURE + ":can not parse");
     }
   }
@@ -174,7 +171,7 @@ public class OperationService {
         try {
           smmChargerService.stop();
         } catch (Exception e) {
-          e.printStackTrace();
+
           opDataService.updateSmmChargerOp(
               smmChargerService.getChargerId(),
               smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
@@ -186,7 +183,6 @@ public class OperationService {
         try {
           smsChargerService.stop();
         } catch (Exception e) {
-          e.printStackTrace();
           opDataService.updateSmsChargerOp(
               smsChargerService.getChargerId(),
               smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
@@ -205,7 +201,7 @@ public class OperationService {
                 () -> {
                   try {
                     return registerElectron();
-                  } catch (IOException e) {
+                  } catch (IOException | OpException e) {
                     return null;
                   }
                 });
@@ -214,48 +210,55 @@ public class OperationService {
       start();
     } else {
       log.error("initialization failed, no config available");
+      opDataService.updateElectronOp(
+          electronId, electronOp -> electronOp.setState(OpState.Aborted));
     }
   }
 
   public void start() {
-    // onStart bond service
-    switch (smmChargerService.getState()) {
+    switch (opDataService.getElectronOp(electronId).getState()) {
       case Initialized:
-      case Aborted:
       case Stopped:
-        try {
-          smmChargerService.start();
-        } catch (Exception e) {
-          e.printStackTrace();
-          opDataService.updateSmmChargerOp(
-              smmChargerService.getChargerId(),
-              smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
-        }
-    }
-    switch (smsChargerService.getState()) {
-      case Initialized:
       case Aborted:
-      case Stopped:
-        try {
-          smsChargerService.start();
-        } catch (Exception e) {
-          e.printStackTrace();
-          opDataService.updateSmsChargerOp(
-              smsChargerService.getChargerId(),
-              smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
+        // onStart bond service
+        switch (smmChargerService.getState()) {
+          case Initialized:
+          case Aborted:
+          case Stopped:
+            try {
+              smmChargerService.start();
+            } catch (Exception e) {
+              opDataService.updateSmmChargerOp(
+                  smmChargerService.getChargerId(),
+                  smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
+            }
         }
+        switch (smsChargerService.getState()) {
+          case Initialized:
+          case Aborted:
+          case Stopped:
+            try {
+              smsChargerService.start();
+            } catch (Exception e) {
+              opDataService.updateSmsChargerOp(
+                  smsChargerService.getChargerId(),
+                  smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
+            }
+        }
+        opDataService.updateElectronOp(
+            electronId, electronOp -> electronOp.setState(OpState.Started));
+        break;
     }
-    opDataService.updateElectronOp(electronId, electronOp -> electronOp.setState(OpState.Started));
   }
 
-  private ElectronInitReq registerElectron() throws IOException {
+  private ElectronInitReq registerElectron() throws IOException, OpException {
     OpCtrlReq opCtrlReq = new OpCtrlReq().id(electronId);
     Object resp =
         rabbitTemplate.convertSendAndReceive(
             TOPIC_SCADATOM,
             ROUTING_TO_NUCLEUS,
             new FlattenedMessage(REGISTER_ELECTRON, opCtrlReq).flat());
-    return FlattenedMessage.inflate(resp.toString()).peel(ElectronInitReq.class);
+    return FlattenedMessage.parseResp(resp, ElectronInitReq.class);
   }
 
   private void initialize(ElectronInitReq config) {

@@ -19,10 +19,15 @@ import io.scadatom.electron.repository.SmsDeviceOpRepository;
 import io.scadatom.neutron.OpState;
 import java.time.ZonedDateTime;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class OpDataService {
+
+  private final Logger log = LoggerFactory.getLogger(OpDataService.class);
+
   private final ElectronOpRepository electronOpRepository;
   private final ParticleOpRepository particleOpRepository;
   private final SmmChargerOpRepository smmChargerOpRepository;
@@ -51,11 +56,12 @@ public class OpDataService {
     this.smsBondOpRepository = smsBondOpRepository;
   }
 
-  public void updateElectronOp(long id, Consumer<ElectronOp> opConsumer) {
+  public ElectronOp updateElectronOp(long id, Consumer<ElectronOp> opConsumer) {
     ElectronOp electronOp = electronOpRepository.findById(id).orElse(new ElectronOp().id(id));
     electronOp.setDt(ZonedDateTime.now());
     opConsumer.accept(electronOp);
-    electronOpRepository.save(electronOp);
+    log.trace(electronOp.toString());
+    return electronOpRepository.save(electronOp);
   }
 
   public ElectronOp getElectronOp(long id) {
@@ -64,11 +70,12 @@ public class OpDataService {
         .orElse(new ElectronOp().id(id).state(OpState.Undefined));
   }
 
-  public void updateParticleOp(long id, Consumer<ParticleOp> opConsumer) {
+  public ParticleOp updateParticleOp(long id, Consumer<ParticleOp> opConsumer) {
     ParticleOp particleOp = particleOpRepository.findById(id).orElse(new ParticleOp().id(id));
     particleOp.setDt(ZonedDateTime.now());
     opConsumer.accept(particleOp);
-    particleOpRepository.save(particleOp);
+    log.trace(particleOp.toString());
+    return particleOpRepository.save(particleOp);
   }
 
   public ParticleOp getParticleOp(long id) {
@@ -77,12 +84,13 @@ public class OpDataService {
         .orElse(new ParticleOp().id(id).state(OpState.Undefined));
   }
 
-  public void updateSmmChargerOp(long id, Consumer<SmmChargerOp> opConsumer) {
+  public SmmChargerOp updateSmmChargerOp(long id, Consumer<SmmChargerOp> opConsumer) {
     SmmChargerOp smmChargerOp =
         smmChargerOpRepository.findById(id).orElse(new SmmChargerOp().id(id));
     smmChargerOp.setDt(ZonedDateTime.now());
     opConsumer.accept(smmChargerOp);
-    smmChargerOpRepository.save(smmChargerOp);
+    log.trace(smmChargerOp.toString());
+    return smmChargerOpRepository.save(smmChargerOp);
   }
 
   public SmmChargerOp getSmmChargerOp(long id) {
@@ -91,11 +99,12 @@ public class OpDataService {
         .orElse(new SmmChargerOp().id(id).state(OpState.Undefined));
   }
 
-  public void updateSmmDeviceOp(long id, Consumer<SmmDeviceOp> opConsumer) {
+  public SmmDeviceOp updateSmmDeviceOp(long id, Consumer<SmmDeviceOp> opConsumer) {
     SmmDeviceOp smmDeviceOp = smmDeviceOpRepository.findById(id).orElse(new SmmDeviceOp().id(id));
     smmDeviceOp.setDt(ZonedDateTime.now());
     opConsumer.accept(smmDeviceOp);
-    smmDeviceOpRepository.save(smmDeviceOp);
+    log.trace(smmDeviceOp.toString());
+    return smmDeviceOpRepository.save(smmDeviceOp);
   }
 
   public SmmDeviceOp getSmmDeviceOp(long id) {
@@ -104,23 +113,25 @@ public class OpDataService {
         .orElse(new SmmDeviceOp().id(id).state(OpState.Undefined));
   }
 
-  public void updateSmmBondOp(long id, Consumer<SmmBondOp> opConsumer) {
+  public SmmBondOp updateSmmBondOp(long id, Consumer<SmmBondOp> opConsumer) {
     SmmBondOp smmBondOp = smmBondOpRepository.findById(id).orElse(new SmmBondOp().id(id));
     smmBondOp.setDt(ZonedDateTime.now());
     opConsumer.accept(smmBondOp);
-    smmBondOpRepository.save(smmBondOp);
+    log.trace(smmBondOp.toString());
+    return smmBondOpRepository.save(smmBondOp);
   }
 
   public SmmBondOp getSmmBondOp(long id) {
     return smmBondOpRepository.findById(id).orElse(new SmmBondOp().id(id).state(OpState.Undefined));
   }
 
-  public void updateSmsChargerOp(long id, Consumer<SmsChargerOp> opConsumer) {
+  public SmsChargerOp updateSmsChargerOp(long id, Consumer<SmsChargerOp> opConsumer) {
     SmsChargerOp smsChargerOp =
         smsChargerOpRepository.findById(id).orElse(new SmsChargerOp().id(id));
     smsChargerOp.setDt(ZonedDateTime.now());
     opConsumer.accept(smsChargerOp);
-    smsChargerOpRepository.save(smsChargerOp);
+    log.trace(smsChargerOp.toString());
+    return smsChargerOpRepository.save(smsChargerOp);
   }
 
   public SmsChargerOp getSmsChargerOp(long id) {
@@ -129,11 +140,12 @@ public class OpDataService {
         .orElse(new SmsChargerOp().id(id).state(OpState.Undefined));
   }
 
-  public void updateSmsDeviceOp(long id, Consumer<SmsDeviceOp> opConsumer) {
+  public SmsDeviceOp updateSmsDeviceOp(long id, Consumer<SmsDeviceOp> opConsumer) {
     SmsDeviceOp smsDeviceOp = smsDeviceOpRepository.findById(id).orElse(new SmsDeviceOp().id(id));
     smsDeviceOp.setDt(ZonedDateTime.now());
     opConsumer.accept(smsDeviceOp);
-    smsDeviceOpRepository.save(smsDeviceOp);
+    log.trace(smsDeviceOp.toString());
+    return smsDeviceOpRepository.save(smsDeviceOp);
   }
 
   public SmsDeviceOp getSmsDeviceOp(long id) {
@@ -142,11 +154,12 @@ public class OpDataService {
         .orElse(new SmsDeviceOp().id(id).state(OpState.Undefined));
   }
 
-  public void updateSmsBondOp(long id, Consumer<SmsBondOp> opConsumer) {
+  public SmsBondOp updateSmsBondOp(long id, Consumer<SmsBondOp> opConsumer) {
     SmsBondOp smsBondOp = smsBondOpRepository.findById(id).orElse(new SmsBondOp().id(id));
     smsBondOp.setDt(ZonedDateTime.now());
     opConsumer.accept(smsBondOp);
-    smsBondOpRepository.save(smsBondOp);
+    log.trace(smsBondOp.toString());
+    return smsBondOpRepository.save(smsBondOp);
   }
 
   public SmsBondOp getSmsBondOp(long id) {

@@ -75,6 +75,11 @@ public class Bootstrap implements ApplicationRunner {
                 .decimalFormat("0.0")
                 .initValue("2.2")
                 .electron(electron1));
+    Particle particle4 =
+        particleRepository.save(
+            new Particle()
+                .name("Particle 4")
+                .electron(electron1));
     SmmCharger smmCharger1 =
         smmChargerRepository.save(
             new SmmCharger()
@@ -84,7 +89,7 @@ public class Bootstrap implements ApplicationRunner {
                 .databit(8)
                 .parity(Parity.Even)
                 .stopbit(Stopbit.One)
-                .batchDelay(0)
+                .batchDelay(10000)
                 .retry(3)
                 .timeout(200)
                 .transDelay(0)

@@ -5,7 +5,7 @@ package io.scadatom.neutron;
  * Charger can be Uninitialized, Initialized, Undefined, Disabled, Stopped, Started, Aborted
  * Device can be Uninitialized, Initialized, Disabled
  * Bond can be Uninitialized, Initialized, Disabled
- * Electron can be Uninitialized, Initialized, Stopped, Started
+ * Electron can be Uninitialized, Initialized, Stopped, Started, Aborted
  * Particle can be Uninitialized, Initialized
  */
 public enum OpState {
@@ -34,7 +34,7 @@ public enum OpState {
      */
     Started,
     /**
-     * Applied to Charger
+     * Applied to Charger, Electron
      */
     Aborted
 }

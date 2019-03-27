@@ -1,12 +1,13 @@
 package io.scadatom.nucleus.service;
 
+import static io.scadatom.neutron.FlattenedMessage.parseResp;
 import static io.scadatom.neutron.Intents.REGISTER_ELECTRON;
 import static io.scadatom.neutron.OpResult.FAILURE;
 import static io.scadatom.neutron.OpResult.SUCCESS;
-import static io.scadatom.neutron.OpResult.TIMEOUT;
 import static io.scadatom.nucleus.config.RabbitmqConfig.ROUTING_TO_ELECTRON;
 import static io.scadatom.nucleus.config.RabbitmqConfig.TOPIC_SCADATOM;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.ElectronOpDTO;
@@ -104,7 +105,6 @@ public class OperationService {
         return new FlattenedMessage(OpResult.INVALID + ":id not found");
       }
     } catch (IOException e) {
-      e.printStackTrace();
       return new FlattenedMessage(FAILURE + ":can not parse payload");
     }
   }
@@ -138,9 +138,9 @@ public class OperationService {
   }
 
   public void initElectron(long id) throws OpException {
-    try {
-      Optional<Electron> optionalElectron = electronRepository.findById(id);
-      if (optionalElectron.isPresent()) {
+    Optional<Electron> optionalElectron = electronRepository.findById(id);
+    if (optionalElectron.isPresent()) {
+      try {
         Object resp =
             rabbitTemplate.convertSendAndReceive(
                 TOPIC_SCADATOM,
@@ -148,53 +148,36 @@ public class OperationService {
                 new FlattenedMessage(Intents.INIT_ELECTRON, makeConfig(optionalElectron.get()))
                     .flat());
         parseResp(resp, Void.class);
-      } else {
-        throw new OpException(OpResult.INVALID + ":id not exist");
+      } catch (JsonProcessingException e) {
+        throw new OpException(OpResult.FAILURE + ":json processing error");
       }
-    } catch (Exception e) {
-      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
-    }
-  }
-
-  private <T> T parseResp(Object resp, Class<T> clazz) throws OpException {
-    if (resp == null) {
-      throw new OpException(TIMEOUT);
-    }
-    try {
-      FlattenedMessage flattenedMessage = FlattenedMessage.inflate(resp.toString());
-      if (!flattenedMessage.getTitle().equals(SUCCESS)) {
-        throw new OpException(flattenedMessage.getTitle()); // specific error
-      } else if (clazz != Void.class) {
-        return flattenedMessage.peel(clazz);
-      }
-      return null;
-    } catch (IOException e) {
-      throw new OpException(FAILURE + ":can not parse payload");
+    } else {
+      throw new OpException(OpResult.INVALID + ":id not exist");
     }
   }
 
   public ElectronOpDTO viewElectron(Long id) throws OpException {
-    try {
-      if (electronRepository.existsById(id)) {
+    if (electronRepository.existsById(id)) {
+      try {
         Object resp =
             rabbitTemplate.convertSendAndReceive(
                 TOPIC_SCADATOM,
                 ROUTING_TO_ELECTRON + id,
                 new FlattenedMessage(Intents.VIEW_ELECTRON, new OpViewReq().id(id)).flat());
         return parseResp(resp, ElectronOpDTO.class);
-      } else {
-        throw new OpException(OpResult.INVALID + ":id not exist");
+      } catch (JsonProcessingException e) {
+        throw new OpException(OpResult.FAILURE + ":json processing error");
       }
-    } catch (Exception e) {
-      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
+    } else {
+      throw new OpException(OpResult.INVALID + ":id not exist");
     }
   }
 
   public void ctrlElectron(OpCtrlReq opCtrlReq) throws OpException {
-    try {
-      Optional<Electron> optionalElectron = electronRepository.findById(opCtrlReq.getId());
-      if (optionalElectron.isPresent()) {
-        Electron electron = optionalElectron.get();
+    Optional<Electron> optionalElectron = electronRepository.findById(opCtrlReq.getId());
+    if (optionalElectron.isPresent()) {
+      Electron electron = optionalElectron.get();
+      try {
         Object resp =
             rabbitTemplate.convertSendAndReceive(
                 TOPIC_SCADATOM,
@@ -211,38 +194,38 @@ public class OperationService {
                                     .toString()))
                     .flat());
         parseResp(resp, Void.class);
-      } else {
-        throw new OpException(OpResult.INVALID + ":id not exist");
+      } catch (JsonProcessingException e) {
+        throw new OpException(OpResult.FAILURE + ":json processing error");
       }
-    } catch (Exception e) {
-      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
+    } else {
+      throw new OpException(OpResult.INVALID + ":id not exist");
     }
   }
 
   public ParticleOpDTO viewParticle(Long id) throws OpException {
-    try {
-      Optional<Particle> optionalParticle = particleRepository.findById(id);
-      if (optionalParticle.isPresent()) {
-        Particle particle = optionalParticle.get();
+    Optional<Particle> optionalParticle = particleRepository.findById(id);
+    if (optionalParticle.isPresent()) {
+      Particle particle = optionalParticle.get();
+      try {
         Object resp =
             rabbitTemplate.convertSendAndReceive(
                 TOPIC_SCADATOM,
                 ROUTING_TO_ELECTRON + particle.getElectron().getId(),
                 new FlattenedMessage(Intents.VIEW_PARTICLE, new OpViewReq().id(id)).flat());
         return parseResp(resp, ParticleOpDTO.class);
-      } else {
-        throw new OpException(OpResult.INVALID + ":id not exist");
+      } catch (JsonProcessingException e) {
+        throw new OpException(OpResult.FAILURE + ":json processing error");
       }
-    } catch (Exception e) {
-      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
+    } else {
+      throw new OpException(OpResult.INVALID + ":id not exist");
     }
   }
 
   public void ctrlParticle(OpCtrlReq opCtrlReq) throws OpException {
-    try {
-      Optional<Particle> optionalParticle = particleRepository.findById(opCtrlReq.getId());
-      if (optionalParticle.isPresent()) {
-        Particle particle = optionalParticle.get();
+    Optional<Particle> optionalParticle = particleRepository.findById(opCtrlReq.getId());
+    if (optionalParticle.isPresent()) {
+      Particle particle = optionalParticle.get();
+      try {
         Object resp =
             rabbitTemplate.convertSendAndReceive(
                 TOPIC_SCADATOM,
@@ -259,11 +242,11 @@ public class OperationService {
                                     .toString()))
                     .flat());
         parseResp(resp, Void.class);
-      } else {
-        throw new OpException(OpResult.INVALID + ":id not exist");
+      } catch (JsonProcessingException e) {
+        throw new OpException(OpResult.FAILURE + ":json processing error");
       }
-    } catch (Exception e) {
-      throw new OpException(OpResult.FAILURE + ":" + e.getClass().getSimpleName());
+    } else {
+      throw new OpException(OpResult.INVALID + ":id not exist");
     }
   }
 

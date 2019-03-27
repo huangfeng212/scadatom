@@ -78,14 +78,14 @@ public class LoggingAspect {
     @Around("applicationPackagePointcut() && springBeanPointcut()")
     public Object logAround(ProceedingJoinPoint joinPoint) throws Throwable {
         if (log.isDebugEnabled()) {
-            log.debug(">>> {}.{}() {}", joinPoint.getSignature().getDeclaringType().getSimpleName(),
+            log.trace(">>> {}.{}() {}", joinPoint.getSignature().getDeclaringType().getSimpleName(),
                 joinPoint.getSignature().getName(), joinPoint.getArgs().length == 0 ? ""
                     : "args:\n\t" + Arrays.toString(joinPoint.getArgs()));
         }
         try {
             Object result = joinPoint.proceed();
             if (log.isDebugEnabled()) {
-                log.debug(
+                log.trace(
                     "<<< {}.{}() {}",
                     joinPoint.getSignature().getDeclaringType().getSimpleName(),
                     joinPoint.getSignature().getName(),
