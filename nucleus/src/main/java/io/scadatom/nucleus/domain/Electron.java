@@ -14,6 +14,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /** A Electron. */
@@ -33,6 +34,10 @@ public class Electron implements Serializable {
   @Column(name = "name", length = 32, nullable = false)
   private String name;
 
+  @NotNull
+  @Column(name = "enabled", nullable = false)
+  private Boolean enabled;
+
   @OneToMany(mappedBy = "electron", orphanRemoval = true)
   private Set<Particle> particles = new HashSet<>();
 
@@ -45,6 +50,19 @@ public class Electron implements Serializable {
   public Electron name(String name) {
     this.name = name;
     return this;
+  }
+
+  public Boolean isEnabled() {
+    return enabled;
+  }
+
+  public Electron enabled(Boolean enabled) {
+    this.enabled = enabled;
+    return this;
+  }
+
+  public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
   }
 
   public Set<Particle> getParticles() {

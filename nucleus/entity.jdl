@@ -2,6 +2,7 @@ DEFAULT_MIN_LENGTH = 1
 DEFAULT_MAX_LENGTH = 32
 DEFAULT_MIN = 0
 entity Electron {
+  enabled Boolean required
 	name String required minlength(DEFAULT_MIN_LENGTH) maxlength(DEFAULT_MAX_LENGTH)
 }
 entity Particle {

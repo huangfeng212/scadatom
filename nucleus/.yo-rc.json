@@ -1,34 +1,34 @@
 {
-    "generator-jhipster": {
-        "promptValues": {
-            "packageName": "io.scadatom.nucleus"
-        },
-        "jhipsterVersion": "5.8.1",
-        "applicationType": "monolith",
-        "baseName": "nucleus",
-        "packageName": "io.scadatom.nucleus",
-        "packageFolder": "io/scadatom/nucleus",
-        "serverPort": "8080",
-        "authenticationType": "jwt",
-        "cacheProvider": "no",
-        "websocket": "spring-websocket",
-        "databaseType": "sql",
-        "devDatabaseType": "h2Memory",
-        "prodDatabaseType": "postgresql",
-        "searchEngine": false,
-        "messageBroker": false,
-        "serviceDiscoveryType": false,
-        "buildTool": "maven",
-        "enableSwaggerCodegen": false,
-        "jwtSecretKey": "NTQ4ZDgyYzg4MzIxY2U3Nzg0M2ZiMTYxNjE1MGY5NDNiZWMzMzk0NGUwMzFkZWFiNjA1NDljM2ZhMDA1YmViM2U0ZWQxZTA1NzgzNWFkYTIzYmMwM2I2ZjNkMTJmNWZiMDkwNjM4YTFhNTE5MjdhNGJmNzk5N2RlZDcxOWQxMzg=",
-        "clientFramework": "angularX",
-        "useSass": false,
-        "clientPackageManager": "npm",
-        "testFrameworks": [],
-        "jhiPrefix": "jhi",
-        "entitySuffix": "",
-        "dtoSuffix": "DTO",
-        "otherModules": [],
-        "enableTranslation": false
-    }
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "io.scadatom.nucleus"
+    },
+    "jhipsterVersion": "5.8.1",
+    "applicationType": "monolith",
+    "baseName": "nucleus",
+    "packageName": "io.scadatom.nucleus",
+    "packageFolder": "io/scadatom/nucleus",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "no",
+    "websocket": "spring-websocket",
+    "databaseType": "sql",
+    "devDatabaseType": "h2Memory",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "maven",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "NTQ4ZDgyYzg4MzIxY2U3Nzg0M2ZiMTYxNjE1MGY5NDNiZWMzMzk0NGUwMzFkZWFiNjA1NDljM2ZhMDA1YmViM2U0ZWQxZTA1NzgzNWFkYTIzYmMwM2I2ZjNkMTJmNWZiMDkwNjM4YTFhNTE5MjdhNGJmNzk5N2RlZDcxOWQxMzg=",
+    "clientFramework": "angularX",
+    "useSass": false,
+    "clientPackageManager": "npm",
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "enableTranslation": false
+  }
 }

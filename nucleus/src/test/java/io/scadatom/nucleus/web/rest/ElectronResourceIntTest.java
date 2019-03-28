@@ -46,6 +46,9 @@ public class ElectronResourceIntTest {
     private static final String DEFAULT_NAME = "AAAAAAAAAA";
     private static final String UPDATED_NAME = "BBBBBBBBBB";
 
+    private static final Boolean DEFAULT_ENABLED = false;
+    private static final Boolean UPDATED_ENABLED = true;
+
     @Autowired
     private ElectronRepository electronRepository;
 
@@ -94,7 +97,8 @@ public class ElectronResourceIntTest {
      */
     public static Electron createEntity(EntityManager em) {
         Electron electron = new Electron()
-            .name(DEFAULT_NAME);
+            .name(DEFAULT_NAME)
+            .enabled(DEFAULT_ENABLED);
         return electron;
     }
 
@@ -120,6 +124,7 @@ public class ElectronResourceIntTest {
         assertThat(electronList).hasSize(databaseSizeBeforeCreate + 1);
         Electron testElectron = electronList.get(electronList.size() - 1);
         assertThat(testElectron.getName()).isEqualTo(DEFAULT_NAME);
+        assertThat(testElectron.isEnabled()).isEqualTo(DEFAULT_ENABLED);
     }
 
     @Test
@@ -163,6 +168,25 @@ public class ElectronResourceIntTest {
 
     @Test
     @Transactional
+    public void checkEnabledIsRequired() throws Exception {
+        int databaseSizeBeforeTest = electronRepository.findAll().size();
+        // set the field null
+        electron.setEnabled(null);
+
+        // Create the Electron, which fails.
+        ElectronDTO electronDTO = electronMapper.toDto(electron);
+
+        restElectronMockMvc.perform(post("/api/electrons")
+            .contentType(TestUtil.APPLICATION_JSON_UTF8)
+            .content(TestUtil.convertObjectToJsonBytes(electronDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<Electron> electronList = electronRepository.findAll();
+        assertThat(electronList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     public void getAllElectrons() throws Exception {
         // Initialize the database
         electronRepository.saveAndFlush(electron);
@@ -172,7 +196,8 @@ public class ElectronResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(electron.getId().intValue())))
-            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())));
+            .andExpect(jsonPath("$.[*].name").value(hasItem(DEFAULT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].enabled").value(hasItem(DEFAULT_ENABLED.booleanValue())));
     }
     
     @Test
@@ -186,7 +211,8 @@ public class ElectronResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(electron.getId().intValue()))
-            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()));
+            .andExpect(jsonPath("$.name").value(DEFAULT_NAME.toString()))
+            .andExpect(jsonPath("$.enabled").value(DEFAULT_ENABLED.booleanValue()));
     }
 
     @Test
@@ -210,7 +236,8 @@ public class ElectronResourceIntTest {
         // Disconnect from session so that the updates on updatedElectron are not directly saved in db
         em.detach(updatedElectron);
         updatedElectron
-            .name(UPDATED_NAME);
+            .name(UPDATED_NAME)
+            .enabled(UPDATED_ENABLED);
         ElectronDTO electronDTO = electronMapper.toDto(updatedElectron);
 
         restElectronMockMvc.perform(put("/api/electrons")
@@ -223,6 +250,7 @@ public class ElectronResourceIntTest {
         assertThat(electronList).hasSize(databaseSizeBeforeUpdate);
         Electron testElectron = electronList.get(electronList.size() - 1);
         assertThat(testElectron.getName()).isEqualTo(UPDATED_NAME);
+        assertThat(testElectron.isEnabled()).isEqualTo(UPDATED_ENABLED);
     }
 
     @Test

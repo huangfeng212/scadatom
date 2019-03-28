@@ -7,9 +7,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-/**
- * A DTO for the Electron entity.
- */
+/** A DTO for the Electron entity. */
 public class ElectronDTO implements Serializable {
 
   private Long id;
@@ -17,6 +15,8 @@ public class ElectronDTO implements Serializable {
   @NotNull
   @Size(min = 1, max = 32)
   private String name;
+
+  @NotNull private Boolean enabled;
 
   private Set<EntityRef> particles = new HashSet<>();
   private EntityRef smmCharger;
@@ -44,6 +44,14 @@ public class ElectronDTO implements Serializable {
 
   public void setSmsCharger(EntityRef smsCharger) {
     this.smsCharger = smsCharger;
+  }
+
+  public Boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(Boolean enabled) {
+    this.enabled = enabled;
   }
 
   @Override

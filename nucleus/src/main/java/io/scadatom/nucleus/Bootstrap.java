@@ -53,7 +53,7 @@ public class Bootstrap implements ApplicationRunner {
     particleRepository.deleteAll();
     electronRepository.deleteAll();
     // Electron 1 to test modbus
-    Electron electron1 = electronRepository.save(new Electron().name("Electron 1"));
+    Electron electron1 = electronRepository.save(new Electron().name("Electron 1").enabled(true));
     Particle particle1_1 =
         particleRepository.save(
             new Particle()
@@ -150,7 +150,7 @@ public class Bootstrap implements ApplicationRunner {
                 .particle(particle1_2)
                 .smsDevice(smsDevice1_1));
                 // Electron 2 to test no charger
-    Electron electron2 = electronRepository.save(new Electron().name("Electron 2"));
+    Electron electron2 = electronRepository.save(new Electron().name("Electron 2").enabled(true));
     Particle particle2_1 =
         particleRepository.save(
             new Particle()

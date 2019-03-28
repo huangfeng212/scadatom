@@ -21,7 +21,7 @@ describe('Service Tests', () => {
             service = injector.get(ElectronService);
             httpMock = injector.get(HttpTestingController);
 
-            elemDefault = new Electron(0, 'AAAAAAA');
+            elemDefault = new Electron(0, 'AAAAAAA', false);
         });
 
         describe('Service methods', async () => {
@@ -55,7 +55,8 @@ describe('Service Tests', () => {
             it('should update a Electron', async () => {
                 const returnedFromService = Object.assign(
                     {
-                        name: 'BBBBBB'
+                        name: 'BBBBBB',
+                        enabled: true
                     },
                     elemDefault
                 );
@@ -72,7 +73,8 @@ describe('Service Tests', () => {
             it('should return a list of Electron', async () => {
                 const returnedFromService = Object.assign(
                     {
-                        name: 'BBBBBB'
+                        name: 'BBBBBB',
+                        enabled: true
                     },
                     elemDefault
                 );

@@ -1,5 +1,15 @@
 {
-    "name": "Electron",
+    "fluentMethods": true,
+    "clientRootFolder": "",
+    "relationships": [
+        {
+            "relationshipType": "one-to-many",
+            "relationshipName": "particle",
+            "otherEntityName": "particle",
+            "otherEntityRelationshipName": "electron",
+            "otherEntityRelationshipNameUndefined": false
+        }
+    ],
     "fields": [
         {
             "fieldName": "name",
@@ -11,23 +21,21 @@
             ],
             "fieldValidateRulesMinlength": 1,
             "fieldValidateRulesMaxlength": 32
-        }
-    ],
-    "relationships": [
+        },
         {
-            "relationshipType": "one-to-many",
-            "relationshipName": "particle",
-            "otherEntityName": "particle",
-            "otherEntityRelationshipName": "electron"
+            "fieldName": "enabled",
+            "fieldType": "Boolean",
+            "fieldValidateRules": [
+                "required"
+            ]
         }
     ],
     "changelogDate": "20190324022901",
-    "entityTableName": "electron",
     "dto": "mapstruct",
-    "pagination": "no",
+    "searchEngine": false,
     "service": "serviceClass",
+    "entityTableName": "electron",
+    "databaseType": "sql",
     "jpaMetamodelFiltering": false,
-    "fluentMethods": true,
-    "clientRootFolder": "",
-    "applications": "*"
+    "pagination": "no"
 }
