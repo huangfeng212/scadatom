@@ -1,4 +1,4 @@
-package io.scadatom.electron.service;
+package io.scadatom.electron.service.operation;
 
 public interface ValueWatcher {
 

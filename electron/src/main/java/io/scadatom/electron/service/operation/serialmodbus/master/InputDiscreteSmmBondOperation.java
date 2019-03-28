@@ -1,4 +1,4 @@
-package io.scadatom.electron.serial.modbus.master;
+package io.scadatom.electron.service.operation.serialmodbus.master;
 
 import com.ghgande.j2mod.modbus.msg.ModbusRequest;
 import com.ghgande.j2mod.modbus.msg.ModbusResponse;
@@ -26,11 +26,6 @@ public class InputDiscreteSmmBondOperation extends SmmBondOperation {
     BitVector bv = ((ReadInputDiscretesResponse) modbusResponse).getDiscretes();
     bv.forceSize(1);
     return bv.getBit(0) ? 1 : 0;
-  }
-
-  @Override
-  public boolean isWritable() {
-    return false;
   }
 
   @Override

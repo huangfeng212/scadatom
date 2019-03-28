@@ -1,4 +1,4 @@
-package io.scadatom.electron.serial.modbus.master;
+package io.scadatom.electron.service.operation.serialmodbus.master;
 
 import com.ghgande.j2mod.modbus.msg.ModbusRequest;
 import com.ghgande.j2mod.modbus.msg.ModbusResponse;
@@ -6,7 +6,7 @@ import com.ghgande.j2mod.modbus.msg.ReadCoilsRequest;
 import com.ghgande.j2mod.modbus.msg.ReadCoilsResponse;
 import com.ghgande.j2mod.modbus.msg.WriteCoilRequest;
 import com.ghgande.j2mod.modbus.util.BitVector;
-import io.scadatom.electron.service.CommandWatcher;
+import io.scadatom.electron.service.operation.CommandWatcher;
 import io.scadatom.neutron.SmmBondDTO;
 import io.scadatom.neutron.SmmDeviceDTO;
 
@@ -34,11 +34,6 @@ public class CoilSmmBondOperation extends SmmBondOperation implements CommandWat
     BitVector bv = ((ReadCoilsResponse) modbusResponse).getCoils();
     bv.forceSize(1);
     return bv.getBit(0) ? 1 : 0;
-  }
-
-  @Override
-  public boolean isWritable() {
-    return true;
   }
 
   @Override

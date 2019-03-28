@@ -1,4 +1,4 @@
-package io.scadatom.electron.serial.modbus.master;
+package io.scadatom.electron.service.operation.serialmodbus.master;
 
 import com.ghgande.j2mod.modbus.procimg.InputRegister;
 import com.ghgande.j2mod.modbus.procimg.Register;

@@ -1,4 +1,4 @@
-package io.scadatom.electron.serial.modbus.master;
+package io.scadatom.electron.service.operation.serialmodbus.master;
 
 import com.ghgande.j2mod.modbus.msg.ModbusRequest;
 import com.ghgande.j2mod.modbus.msg.ModbusResponse;
@@ -43,11 +43,6 @@ public class InputRegSmmBondOperation extends SmmBondOperation {
     InputRegister[] regs = ((ReadInputRegistersResponse) modbusResponse).getRegisters();
     double stsRaw = valueParser.toDouble(regs);
     return exprIn.setVariable("x", stsRaw).evaluate();
-  }
-
-  @Override
-  public boolean isWritable() {
-    return false;
   }
 
   @Override

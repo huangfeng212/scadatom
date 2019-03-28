@@ -1,4 +1,4 @@
-package io.scadatom.electron.serial.modbus.master;
+package io.scadatom.electron.service.operation.serialmodbus.master;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
 
@@ -11,9 +11,9 @@ import com.ghgande.j2mod.modbus.net.AbstractSerialConnection;
 import com.ghgande.j2mod.modbus.net.SerialConnection;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 import io.scadatom.electron.service.AbstractChargerService;
-import io.scadatom.electron.service.CommandWatcher;
-import io.scadatom.electron.service.OpChangeService;
-import io.scadatom.electron.service.OpDataService;
+import io.scadatom.electron.service.operation.CommandWatcher;
+import io.scadatom.electron.service.operation.OpDataService;
+import io.scadatom.electron.service.operation.OpEventService;
 import io.scadatom.electron.service.util.DoubleUtil;
 import io.scadatom.electron.service.util.SerialPortUtil;
 import io.scadatom.neutron.ElectronInitReq;
@@ -37,7 +37,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
 
   private final Logger log = LoggerFactory.getLogger(SmmChargerService.class);
 
-  private final OpChangeService opChangeService;
+  private final OpEventService opEventService;
   private final OpDataService opDataService;
   private SerialParameters serialParameters;
   private AbstractSerialConnection abstractSerialConnection;
@@ -50,8 +50,8 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
   private Map<Long, SmmBondOperation> smmBondOperationMap =
       new HashMap<>(); // only enabled bonds enters here
 
-  public SmmChargerService(OpChangeService opChangeService, OpDataService opDataService) {
-    this.opChangeService = opChangeService;
+  public SmmChargerService(OpEventService opEventService, OpDataService opDataService) {
+    this.opEventService = opEventService;
     this.opDataService = opDataService;
   }
 
@@ -131,7 +131,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                                       smmBondOp.setReadRequest(
                                           coilSmmBondOperation.getReadRequest().getHexMessage());
                                     });
-                                opChangeService.addCommandWatcher(
+                                opEventService.addCommandWatcher(
                                     smmBondDTO.getParticle().getId(), coilSmmBondOperation);
                                 break;
                               case InputDiscrete:
@@ -167,7 +167,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                                     new HoldingRegSmmBondOperation(smmDeviceDTO, smmBondDTO);
                                 smmBondOperationMap.put(
                                     smmBondDTO.getId(), holdingRegSmmBondOperation);
-                                opChangeService.addCommandWatcher(
+                                opEventService.addCommandWatcher(
                                     smmBondDTO.getParticle().getId(), holdingRegSmmBondOperation);
                                 opDataService.updateSmmBondOp(
                                     smmBondDTO.getId(),
@@ -259,17 +259,13 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
               smmBondOp.setPollStatus(SmmPollStatus.Normal);
               smmBondOp.setReadResponse(finalModbusResponse1.getHexMessage());
             });
-        if (!DoubleUtil.doubleEqual(
-            readSts, smmBondOperation.getSts())) { // observed difference, notify watcher
-          smmBondOperation.setSts(readSts);
-          opChangeService.onValueRead(
+          opEventService.onValueRead(
               smmBondOperation.getSmmBondDTO().getParticle().getId(),
               String.valueOf(smmBondOperation.getSts()),
               "SmmBond_" + smmBondOperation.getSmmBondDTO().getId());
-        }
-        if (smmBondOperation.isWritable()) {
+        if (smmBondOperation.isWritable() && smmBondOperation instanceof CommandWatcher) {
           CommandWatcher commandWatcher = (CommandWatcher) smmBondOperation;
-          if (commandWatcher.getCommand() != null) { // there is a command pending
+          if (commandWatcher.hasPendingCommand()) {
             if (!DoubleUtil.doubleEqual(
                 smmBondOperation.getSts(),
                 Double.valueOf(commandWatcher.getCommand()))) { // command is not applied yet

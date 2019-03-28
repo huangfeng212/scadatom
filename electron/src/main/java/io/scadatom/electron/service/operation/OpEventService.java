@@ -1,16 +1,17 @@
-package io.scadatom.electron.service;
+package io.scadatom.electron.service.operation;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import io.scadatom.electron.domain.ParticleOp;
+import io.scadatom.neutron.ParticleDTO;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OpChangeService {
-  private final Logger log = LoggerFactory.getLogger(OpChangeService.class);
+public class OpEventService {
+  private final Logger log = LoggerFactory.getLogger(OpEventService.class);
 
   private final Multimap<Long, ValueWatcher> valueWatcherMultimap =
       MultimapBuilder.treeKeys().arrayListValues().build();
@@ -19,9 +20,16 @@ public class OpChangeService {
       MultimapBuilder.treeKeys().arrayListValues().build();
 
   private final OpDataService opDataService;
+  private final OpConfigService opConfigService;
 
-  public OpChangeService(OpDataService opDataService) {
+  public OpEventService(OpDataService opDataService, OpConfigService opConfigService) {
     this.opDataService = opDataService;
+      this.opConfigService = opConfigService;
+  }
+
+  public void onValueRead(long particleId, double newValueDouble, String source) {
+      ParticleDTO particleDTO = opConfigService.getOptionalElectronInitReq().ifPresent(electronInitReq -> electronInitReq.getParticleDTOS().get);
+
   }
 
   /**
@@ -50,21 +58,24 @@ public class OpChangeService {
 
   /** Command written from external device by slave charger, */
   public void onCommandWritten(long particleId, String newCommand, String source) {
-    opDataService.updateParticleOp(
-        particleId,
-        particleOp -> {
-          particleOp.setWrittenBy(source);
-          particleOp.setWrittenDt(Instant.now());
-        });
+    ParticleOp updateParticleOp =
+        opDataService.updateParticleOp(
+            particleId,
+            particleOp -> {
+              particleOp.setWrittenBy(source);
+              particleOp.setWrittenDt(Instant.now());
+            });
+    log.debug("commandWritten: {}", updateParticleOp);
     notifyCommandWritten(particleId, newCommand);
     // decide whether to accept the command, now it is always consent
-   ParticleOp updateParticleOp =  opDataService.updateParticleOp(
-        particleId,
-        particleOp -> {
-          particleOp.setValue(newCommand);
-        });
-      log.debug("valueRead: {}", updateParticleOp);
-      notifyValueChange(particleId, newCommand);
+    updateParticleOp =
+        opDataService.updateParticleOp(
+            particleId,
+            particleOp -> {
+              particleOp.setValue(newCommand);
+            });
+    log.debug("valueRead: {}", updateParticleOp);
+    notifyValueChange(particleId, newCommand);
   }
 
   /** Command change requested by either user or external device received by slave charger */

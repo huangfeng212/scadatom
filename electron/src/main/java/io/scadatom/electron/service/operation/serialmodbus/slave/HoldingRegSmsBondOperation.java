@@ -1,10 +1,10 @@
-package io.scadatom.electron.serial.modbus.slave;
+package io.scadatom.electron.service.operation.serialmodbus.slave;
 
 import com.ghgande.j2mod.modbus.procimg.SimpleProcessImage;
 import com.ghgande.j2mod.modbus.util.ModbusUtil;
 import com.ghgande.j2mod.modbus.util.Observable;
 import com.ghgande.j2mod.modbus.util.Observer;
-import io.scadatom.electron.service.OpChangeService;
+import io.scadatom.electron.service.operation.OpEventService;
 import io.scadatom.neutron.SmsBondDTO;
 import io.scadatom.neutron.ValueType;
 import net.objecthunter.exp4j.Expression;
@@ -18,8 +18,8 @@ public class HoldingRegSmsBondOperation extends SmsBondOperation implements Obse
   private SelectiveObservableRegister[] storage;
 
   HoldingRegSmsBondOperation(
-      SmsBondDTO smsBondDTO, SimpleProcessImage spi, OpChangeService opChangeService) {
-    super(smsBondDTO, opChangeService);
+      SmsBondDTO smsBondDTO, SimpleProcessImage spi, OpEventService opEventService) {
+    super(smsBondDTO, opEventService);
     exprIn = new ExpressionBuilder(this.smsBondDTO.getExprIn()).variables("x").build();
     exprOut = new ExpressionBuilder(this.smsBondDTO.getExprOut()).variables("x").build();
     if (this.smsBondDTO.getValueType() == ValueType.Fp32) {
@@ -82,7 +82,7 @@ public class HoldingRegSmsBondOperation extends SmsBondOperation implements Obse
       default:
         throw new IllegalArgumentException("regType invalid");
     }
-    opChangeService.onCommandWritten(
+    opEventService.onCommandWritten(
         smsBondDTO.getParticle().getId(), String.valueOf(cmd), "SmsBond_" + smsBondDTO.getId());
   }
 }

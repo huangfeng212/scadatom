@@ -1,8 +1,8 @@
-package io.scadatom.electron.serial.modbus.slave;
+package io.scadatom.electron.service.operation.serialmodbus.slave;
 
 import com.ghgande.j2mod.modbus.procimg.SimpleDigitalIn;
 import com.ghgande.j2mod.modbus.procimg.SimpleProcessImage;
-import io.scadatom.electron.service.OpChangeService;
+import io.scadatom.electron.service.operation.OpEventService;
 import io.scadatom.electron.service.util.DoubleUtil;
 import io.scadatom.neutron.SmsBondDTO;
 
@@ -11,8 +11,8 @@ public class InputDiscreteSmsBondOperation extends SmsBondOperation {
   private SimpleDigitalIn storage;
 
   InputDiscreteSmsBondOperation(
-      SmsBondDTO smsBondDTO, SimpleProcessImage spi, OpChangeService opChangeService) {
-    super(smsBondDTO, opChangeService);
+      SmsBondDTO smsBondDTO, SimpleProcessImage spi, OpEventService opEventService) {
+    super(smsBondDTO, opEventService);
     SimpleDigitalIn si = new SimpleDigitalIn();
     storage = si;
     spi.addDigitalIn(regStart, si);

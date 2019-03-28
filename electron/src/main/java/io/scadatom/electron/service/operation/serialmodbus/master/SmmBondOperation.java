@@ -1,4 +1,4 @@
-package io.scadatom.electron.serial.modbus.master;
+package io.scadatom.electron.service.operation.serialmodbus.master;
 
 import com.ghgande.j2mod.modbus.msg.ModbusRequest;
 import com.ghgande.j2mod.modbus.msg.ModbusResponse;
@@ -11,8 +11,6 @@ public abstract class SmmBondOperation {
   protected final SmmBondDTO smmBondDTO;
   protected final int refStart;
   protected final int addr;
-  // dynamic attributes
-  protected double sts = Double.NaN;
 
   SmmBondOperation(SmmDeviceDTO smmDeviceDTO, SmmBondDTO smmBondDTO) {
     this.smmBondDTO = smmBondDTO;
@@ -21,22 +19,6 @@ public abstract class SmmBondOperation {
   }
 
   public abstract double parseReadResponse(ModbusResponse modbusResponse);
-
-  public abstract boolean isWritable();
-
-  public double getSts() {
-    return sts;
-  }
-
-  public SmmBondOperation setSts(double sts) {
-    this.sts = sts;
-    return this;
-  }
-
-  SmmBondOperation setStsNaN() {
-    sts = Double.NaN;
-    return this;
-  }
 
   public abstract ModbusRequest getReadRequest();
 

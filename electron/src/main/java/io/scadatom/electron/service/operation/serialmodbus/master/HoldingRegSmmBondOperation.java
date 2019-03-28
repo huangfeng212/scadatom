@@ -1,4 +1,4 @@
-package io.scadatom.electron.serial.modbus.master;
+package io.scadatom.electron.service.operation.serialmodbus.master;
 
 import com.ghgande.j2mod.modbus.msg.ModbusRequest;
 import com.ghgande.j2mod.modbus.msg.ModbusResponse;
@@ -6,7 +6,7 @@ import com.ghgande.j2mod.modbus.msg.ReadMultipleRegistersRequest;
 import com.ghgande.j2mod.modbus.msg.ReadMultipleRegistersResponse;
 import com.ghgande.j2mod.modbus.msg.WriteMultipleRegistersRequest;
 import com.ghgande.j2mod.modbus.procimg.InputRegister;
-import io.scadatom.electron.service.CommandWatcher;
+import io.scadatom.electron.service.operation.CommandWatcher;
 import io.scadatom.neutron.SmmBondDTO;
 import io.scadatom.neutron.SmmDeviceDTO;
 import net.objecthunter.exp4j.Expression;
@@ -53,11 +53,6 @@ public class HoldingRegSmmBondOperation extends SmmBondOperation implements Comm
     InputRegister[] regs = ((ReadMultipleRegistersResponse) modbusResponse).getRegisters();
     double stsRaw = valueParser.toDouble(regs);
     return exprIn.setVariable("x", stsRaw).evaluate();
-  }
-
-  @Override
-  public boolean isWritable() {
-    return true;
   }
 
   @Override

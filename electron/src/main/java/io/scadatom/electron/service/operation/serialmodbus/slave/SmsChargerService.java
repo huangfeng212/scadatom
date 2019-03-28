@@ -1,12 +1,12 @@
-package io.scadatom.electron.serial.modbus.slave;
+package io.scadatom.electron.service.operation.serialmodbus.slave;
 
 import com.ghgande.j2mod.modbus.net.ModbusSerialListener;
 import com.ghgande.j2mod.modbus.procimg.ProcessImage;
 import com.ghgande.j2mod.modbus.procimg.SimpleProcessImage;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 import io.scadatom.electron.service.AbstractChargerService;
-import io.scadatom.electron.service.OpChangeService;
-import io.scadatom.electron.service.OpDataService;
+import io.scadatom.electron.service.operation.OpEventService;
+import io.scadatom.electron.service.operation.OpDataService;
 import io.scadatom.electron.service.util.SerialPortUtil;
 import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.OpState;
@@ -24,7 +24,7 @@ public class SmsChargerService extends AbstractChargerService {
 
   private final Logger log = LoggerFactory.getLogger(SmsChargerService.class);
 
-  private final OpChangeService opChangeService;
+  private final OpEventService opEventService;
   private final OpDataService opDataService;
   private final Map<Integer, ProcessImage> processImageMap = new HashMap<>();
   private SerialParameters serialParameters;
@@ -35,8 +35,8 @@ public class SmsChargerService extends AbstractChargerService {
   private Map<Long, SmsBondDTO> smsBondDTOMap = new HashMap<>();
   private Map<Long, SmsBondOperation> smsBondOperationMap = new HashMap<>();
 
-  public SmsChargerService(OpChangeService opChangeService, OpDataService opDataService) {
-    this.opChangeService = opChangeService;
+  public SmsChargerService(OpEventService opEventService, OpDataService opDataService) {
+    this.opEventService = opEventService;
     this.opDataService = opDataService;
   }
 
@@ -103,24 +103,24 @@ public class SmsChargerService extends AbstractChargerService {
                               case Coil:
                                 smsBondOperationMap.put(
                                     smsBondDTO.getId(),
-                                    new CoilSmsBondOperation(smsBondDTO, spi, opChangeService));
+                                    new CoilSmsBondOperation(smsBondDTO, spi, opEventService));
                                 break;
                               case InputDiscrete:
                                 smsBondOperationMap.put(
                                     smsBondDTO.getId(),
                                     new InputDiscreteSmsBondOperation(
-                                        smsBondDTO, spi, opChangeService));
+                                        smsBondDTO, spi, opEventService));
                                 break;
                               case InputReg:
                                 smsBondOperationMap.put(
                                     smsBondDTO.getId(),
-                                    new InputRegSmsBondOperation(smsBondDTO, spi, opChangeService));
+                                    new InputRegSmsBondOperation(smsBondDTO, spi, opEventService));
                                 break;
                               case HoldingReg:
                                 smsBondOperationMap.put(
                                     smsBondDTO.getId(),
                                     new HoldingRegSmsBondOperation(
-                                        smsBondDTO, spi, opChangeService));
+                                        smsBondDTO, spi, opEventService));
                                 break;
                             }
                             opDataService.updateSmsBondOp(

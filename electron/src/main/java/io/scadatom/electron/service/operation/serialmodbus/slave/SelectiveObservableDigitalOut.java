@@ -1,4 +1,4 @@
-package io.scadatom.electron.serial.modbus.slave;
+package io.scadatom.electron.service.operation.serialmodbus.slave;
 
 import com.ghgande.j2mod.modbus.procimg.ObservableDigitalOut;
 

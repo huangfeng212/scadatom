@@ -1,4 +1,4 @@
-package io.scadatom.electron.service;
+package io.scadatom.electron.service.operation;
 
 public interface CommandWatcher {
 
@@ -8,7 +8,7 @@ public interface CommandWatcher {
 
     void clearCommand();
 
-    default boolean hasCmd() {
-        return getCommand() == null;
+    default boolean hasPendingCommand() {
+        return getCommand() != null;
     }
 }

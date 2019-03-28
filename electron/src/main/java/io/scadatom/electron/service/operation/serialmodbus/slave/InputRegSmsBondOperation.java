@@ -1,9 +1,9 @@
-package io.scadatom.electron.serial.modbus.slave;
+package io.scadatom.electron.service.operation.serialmodbus.slave;
 
 import com.ghgande.j2mod.modbus.procimg.SimpleInputRegister;
 import com.ghgande.j2mod.modbus.procimg.SimpleProcessImage;
 import com.ghgande.j2mod.modbus.util.ModbusUtil;
-import io.scadatom.electron.service.OpChangeService;
+import io.scadatom.electron.service.operation.OpEventService;
 import io.scadatom.neutron.SmsBondDTO;
 import io.scadatom.neutron.ValueType;
 import java.util.Arrays;
@@ -16,8 +16,8 @@ public class InputRegSmsBondOperation extends SmsBondOperation {
   private SimpleInputRegister[] storage;
 
   InputRegSmsBondOperation(
-      SmsBondDTO smsBondDTO, SimpleProcessImage spi, OpChangeService opChangeService) {
-    super(smsBondDTO, opChangeService);
+      SmsBondDTO smsBondDTO, SimpleProcessImage spi, OpEventService opEventService) {
+    super(smsBondDTO, opEventService);
     exprIn = new ExpressionBuilder(this.smsBondDTO.getExprIn()).variables("x").build();
     if (this.smsBondDTO.getValueType() == ValueType.Fp32) {
       SimpleInputRegister regHi = new SimpleInputRegister(0);

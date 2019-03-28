@@ -1,9 +1,7 @@
-package io.scadatom.electron.service;
+package io.scadatom.electron.service.operation;
 
 import static io.scadatom.electron.config.RabbitmqConfig.ROUTING_TO_NUCLEUS;
 import static io.scadatom.electron.config.RabbitmqConfig.TOPIC_SCADATOM;
-import static io.scadatom.electron.service.util.ConfigUtil.loadConfig;
-import static io.scadatom.electron.service.util.ConfigUtil.saveConfig;
 import static io.scadatom.neutron.Intents.CTRL_ELECTRON;
 import static io.scadatom.neutron.Intents.CTRL_PARTICLE;
 import static io.scadatom.neutron.Intents.INIT_ELECTRON;
@@ -16,10 +14,10 @@ import static io.scadatom.neutron.OpResult.SUCCESS;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.scadatom.electron.repository.ElectronOpRepository;
 import io.scadatom.electron.repository.ParticleOpRepository;
-import io.scadatom.electron.serial.modbus.master.SmmChargerService;
-import io.scadatom.electron.serial.modbus.slave.SmsChargerService;
 import io.scadatom.electron.service.mapper.ElectronOpMapper;
 import io.scadatom.electron.service.mapper.ParticleOpMapper;
+import io.scadatom.electron.service.operation.serialmodbus.master.SmmChargerService;
+import io.scadatom.electron.service.operation.serialmodbus.slave.SmsChargerService;
 import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.FlattenedMessage;
 import io.scadatom.neutron.FlattenedMessageHandler;
@@ -50,10 +48,10 @@ public class OperationService {
   private final Logger log = LoggerFactory.getLogger(OperationService.class);
   private final ObjectMapper objectMapper;
   private final RabbitTemplate rabbitTemplate;
-
+  private final OpConfigService opConfigService;
   private final SmmChargerService smmChargerService;
   private final SmsChargerService smsChargerService;
-  private final OpChangeService opChangeService;
+  private final OpEventService opEventService;
   private final OpDataService opDataService;
   private final ElectronOpRepository electronOpRepository;
   private final ParticleOpRepository particleOpRepository;
@@ -68,9 +66,10 @@ public class OperationService {
   public OperationService(
       ObjectMapper objectMapper,
       RabbitTemplate rabbitTemplate,
+      OpConfigService opConfigService,
       SmmChargerService smmChargerService,
       SmsChargerService smsChargerService,
-      OpChangeService opChangeService,
+      OpEventService opEventService,
       OpDataService opDataService,
       ElectronOpRepository electronOpRepository,
       ParticleOpRepository particleOpRepository,
@@ -79,9 +78,10 @@ public class OperationService {
       @Value("${electron.id}") Long electronId) {
     this.objectMapper = objectMapper;
     this.rabbitTemplate = rabbitTemplate;
+    this.opConfigService = opConfigService;
     this.smmChargerService = smmChargerService;
     this.smsChargerService = smsChargerService;
-    this.opChangeService = opChangeService;
+    this.opEventService = opEventService;
     this.opDataService = opDataService;
     this.electronOpRepository = electronOpRepository;
     this.particleOpRepository = particleOpRepository;
@@ -102,7 +102,7 @@ public class OperationService {
       if (!Objects.equals(electronInitReq.getElectronDTO().getId(), electronId)) {
         return new FlattenedMessage(FAILURE + ":non matching electron id from payload");
       }
-      saveConfig(electronInitReq);
+      opConfigService.saveConfig(electronInitReq);
       stop();
       onStart();
       return new FlattenedMessage(SUCCESS);
@@ -119,7 +119,6 @@ public class OperationService {
       return new FlattenedMessage(
           SUCCESS, electronOpMapper.toDto(opDataService.getElectronOp(opViewReq.getId())));
     } catch (IOException e) {
-
       return new FlattenedMessage(FAILURE + ":can not parse payload");
     }
   }
@@ -147,7 +146,6 @@ public class OperationService {
       return new FlattenedMessage(
           SUCCESS, particleOpMapper.toDto(opDataService.getParticleOp(opViewReq.getId())));
     } catch (IOException e) {
-
       return new FlattenedMessage(FAILURE + ":can not parse or form message");
     }
   }
@@ -155,7 +153,7 @@ public class OperationService {
   private FlattenedMessage handleCtrlParticle(FlattenedMessage flattenedMessage) {
     try {
       OpCtrlReq opCtrlReq = flattenedMessage.peel(OpCtrlReq.class);
-      opChangeService.onCommandWritten(
+      opEventService.onCommandWritten(
           opCtrlReq.getId(), opCtrlReq.getCommand(), "RemoteUser_" + opCtrlReq.getUser());
       return new FlattenedMessage(SUCCESS);
     } catch (IOException e) {
@@ -164,14 +162,13 @@ public class OperationService {
   }
 
   public void stop() {
-    opChangeService.dismissAll();
+    opEventService.dismissAll();
     switch (smmChargerService.getState()) {
       case Initialized:
       case Started:
         try {
           smmChargerService.stop();
         } catch (Exception e) {
-
           opDataService.updateSmmChargerOp(
               smmChargerService.getChargerId(),
               smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
@@ -196,12 +193,14 @@ public class OperationService {
     opDataService.updateElectronOp(
         electronId, electronOp -> electronOp.setState(OpState.Uninitialized));
     ElectronInitReq config =
-        loadConfig(electronId)
+        opConfigService
+            .loadConfig()
             .orElseGet(
                 () -> {
                   try {
                     return registerElectron();
                   } catch (IOException | OpException e) {
+                    log.error("failed to register to nucleus");
                     return null;
                   }
                 });
@@ -303,9 +302,9 @@ public class OperationService {
         .forEach(
             particle -> {
               if (!StringUtils.isBlank(particle.getInitValue())) {
-                opChangeService.onCommandWritten(
+                opEventService.onCommandWritten(
                     particle.getId(), particle.getInitValue(), INIT_VALUE);
-                opChangeService.onValueRead(particle.getId(), particle.getInitValue(), INIT_VALUE);
+                opEventService.onValueRead(particle.getId(), particle.getInitValue(), INIT_VALUE);
               }
               opDataService.updateParticleOp(
                   particle.getId(),

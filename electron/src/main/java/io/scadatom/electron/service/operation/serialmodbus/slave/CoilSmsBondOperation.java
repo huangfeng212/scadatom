@@ -1,9 +1,9 @@
-package io.scadatom.electron.serial.modbus.slave;
+package io.scadatom.electron.service.operation.serialmodbus.slave;
 
 import com.ghgande.j2mod.modbus.procimg.SimpleProcessImage;
 import com.ghgande.j2mod.modbus.util.Observable;
 import com.ghgande.j2mod.modbus.util.Observer;
-import io.scadatom.electron.service.OpChangeService;
+import io.scadatom.electron.service.operation.OpEventService;
 import io.scadatom.electron.service.util.DoubleUtil;
 import io.scadatom.neutron.SmsBondDTO;
 
@@ -12,8 +12,8 @@ public class CoilSmsBondOperation extends SmsBondOperation implements Observer {
   private SelectiveObservableDigitalOut storage;
 
   CoilSmsBondOperation(
-      SmsBondDTO smsBondDTO, SimpleProcessImage spi, OpChangeService opChangeService) {
-    super(smsBondDTO, opChangeService);
+      SmsBondDTO smsBondDTO, SimpleProcessImage spi, OpEventService opEventService) {
+    super(smsBondDTO, opEventService);
     SelectiveObservableDigitalOut so = new SelectiveObservableDigitalOut();
     so.addObserver(this);
     storage = so;
@@ -42,7 +42,7 @@ public class CoilSmsBondOperation extends SmsBondOperation implements Observer {
   @Override
   public void update(Observable o, Object arg) {
     double cmd = storage.isSet() ? 1 : 0;
-    opChangeService.onCommandWritten(
+    opEventService.onCommandWritten(
         smsBondDTO.getParticle().getId(), String.valueOf(cmd), "SmmBond_" + smsBondDTO.getId());
   }
 }
