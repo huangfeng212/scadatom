@@ -8,8 +8,6 @@ import { SmsDeviceOp } from 'app/shared/model/sms-device-op.model';
 import { SmsDeviceOpService } from './sms-device-op.service';
 import { SmsDeviceOpComponent } from './sms-device-op.component';
 import { SmsDeviceOpDetailComponent } from './sms-device-op-detail.component';
-import { SmsDeviceOpUpdateComponent } from './sms-device-op-update.component';
-import { SmsDeviceOpDeletePopupComponent } from './sms-device-op-delete-dialog.component';
 import { ISmsDeviceOp } from 'app/shared/model/sms-device-op.model';
 
 @Injectable({ providedIn: 'root' })
@@ -49,45 +47,5 @@ export const smsDeviceOpRoute: Routes = [
             pageTitle: 'SmsDeviceOps'
         },
         canActivate: [UserRouteAccessService]
-    },
-    {
-        path: 'new',
-        component: SmsDeviceOpUpdateComponent,
-        resolve: {
-            smsDeviceOp: SmsDeviceOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmsDeviceOps'
-        },
-        canActivate: [UserRouteAccessService]
-    },
-    {
-        path: ':id/edit',
-        component: SmsDeviceOpUpdateComponent,
-        resolve: {
-            smsDeviceOp: SmsDeviceOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmsDeviceOps'
-        },
-        canActivate: [UserRouteAccessService]
-    }
-];
-
-export const smsDeviceOpPopupRoute: Routes = [
-    {
-        path: ':id/delete',
-        component: SmsDeviceOpDeletePopupComponent,
-        resolve: {
-            smsDeviceOp: SmsDeviceOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmsDeviceOps'
-        },
-        canActivate: [UserRouteAccessService],
-        outlet: 'popup'
     }
 ];

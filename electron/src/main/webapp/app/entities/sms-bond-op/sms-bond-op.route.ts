@@ -8,8 +8,6 @@ import { SmsBondOp } from 'app/shared/model/sms-bond-op.model';
 import { SmsBondOpService } from './sms-bond-op.service';
 import { SmsBondOpComponent } from './sms-bond-op.component';
 import { SmsBondOpDetailComponent } from './sms-bond-op-detail.component';
-import { SmsBondOpUpdateComponent } from './sms-bond-op-update.component';
-import { SmsBondOpDeletePopupComponent } from './sms-bond-op-delete-dialog.component';
 import { ISmsBondOp } from 'app/shared/model/sms-bond-op.model';
 
 @Injectable({ providedIn: 'root' })
@@ -49,45 +47,5 @@ export const smsBondOpRoute: Routes = [
             pageTitle: 'SmsBondOps'
         },
         canActivate: [UserRouteAccessService]
-    },
-    {
-        path: 'new',
-        component: SmsBondOpUpdateComponent,
-        resolve: {
-            smsBondOp: SmsBondOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmsBondOps'
-        },
-        canActivate: [UserRouteAccessService]
-    },
-    {
-        path: ':id/edit',
-        component: SmsBondOpUpdateComponent,
-        resolve: {
-            smsBondOp: SmsBondOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmsBondOps'
-        },
-        canActivate: [UserRouteAccessService]
-    }
-];
-
-export const smsBondOpPopupRoute: Routes = [
-    {
-        path: ':id/delete',
-        component: SmsBondOpDeletePopupComponent,
-        resolve: {
-            smsBondOp: SmsBondOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmsBondOps'
-        },
-        canActivate: [UserRouteAccessService],
-        outlet: 'popup'
     }
 ];

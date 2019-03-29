@@ -8,8 +8,6 @@ import { SmmBondOp } from 'app/shared/model/smm-bond-op.model';
 import { SmmBondOpService } from './smm-bond-op.service';
 import { SmmBondOpComponent } from './smm-bond-op.component';
 import { SmmBondOpDetailComponent } from './smm-bond-op-detail.component';
-import { SmmBondOpUpdateComponent } from './smm-bond-op-update.component';
-import { SmmBondOpDeletePopupComponent } from './smm-bond-op-delete-dialog.component';
 import { ISmmBondOp } from 'app/shared/model/smm-bond-op.model';
 
 @Injectable({ providedIn: 'root' })
@@ -49,45 +47,5 @@ export const smmBondOpRoute: Routes = [
             pageTitle: 'SmmBondOps'
         },
         canActivate: [UserRouteAccessService]
-    },
-    {
-        path: 'new',
-        component: SmmBondOpUpdateComponent,
-        resolve: {
-            smmBondOp: SmmBondOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmmBondOps'
-        },
-        canActivate: [UserRouteAccessService]
-    },
-    {
-        path: ':id/edit',
-        component: SmmBondOpUpdateComponent,
-        resolve: {
-            smmBondOp: SmmBondOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmmBondOps'
-        },
-        canActivate: [UserRouteAccessService]
-    }
-];
-
-export const smmBondOpPopupRoute: Routes = [
-    {
-        path: ':id/delete',
-        component: SmmBondOpDeletePopupComponent,
-        resolve: {
-            smmBondOp: SmmBondOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmmBondOps'
-        },
-        canActivate: [UserRouteAccessService],
-        outlet: 'popup'
     }
 ];

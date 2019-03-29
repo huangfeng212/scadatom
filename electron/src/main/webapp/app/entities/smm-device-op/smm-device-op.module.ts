@@ -2,28 +2,14 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { ElectronSharedModule } from 'app/shared';
-import {
-    SmmDeviceOpComponent,
-    SmmDeviceOpDetailComponent,
-    SmmDeviceOpUpdateComponent,
-    SmmDeviceOpDeletePopupComponent,
-    SmmDeviceOpDeleteDialogComponent,
-    smmDeviceOpRoute,
-    smmDeviceOpPopupRoute
-} from './';
+import { SmmDeviceOpComponent, SmmDeviceOpDetailComponent, smmDeviceOpRoute } from './';
 
-const ENTITY_STATES = [...smmDeviceOpRoute, ...smmDeviceOpPopupRoute];
+const ENTITY_STATES = [...smmDeviceOpRoute];
 
 @NgModule({
     imports: [ElectronSharedModule, RouterModule.forChild(ENTITY_STATES)],
-    declarations: [
-        SmmDeviceOpComponent,
-        SmmDeviceOpDetailComponent,
-        SmmDeviceOpUpdateComponent,
-        SmmDeviceOpDeleteDialogComponent,
-        SmmDeviceOpDeletePopupComponent
-    ],
-    entryComponents: [SmmDeviceOpComponent, SmmDeviceOpUpdateComponent, SmmDeviceOpDeleteDialogComponent, SmmDeviceOpDeletePopupComponent],
+    declarations: [SmmDeviceOpComponent, SmmDeviceOpDetailComponent],
+    entryComponents: [SmmDeviceOpComponent],
     schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ElectronSmmDeviceOpModule {}

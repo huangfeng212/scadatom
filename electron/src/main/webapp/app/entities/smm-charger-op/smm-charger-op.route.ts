@@ -8,8 +8,6 @@ import { SmmChargerOp } from 'app/shared/model/smm-charger-op.model';
 import { SmmChargerOpService } from './smm-charger-op.service';
 import { SmmChargerOpComponent } from './smm-charger-op.component';
 import { SmmChargerOpDetailComponent } from './smm-charger-op-detail.component';
-import { SmmChargerOpUpdateComponent } from './smm-charger-op-update.component';
-import { SmmChargerOpDeletePopupComponent } from './smm-charger-op-delete-dialog.component';
 import { ISmmChargerOp } from 'app/shared/model/smm-charger-op.model';
 
 @Injectable({ providedIn: 'root' })
@@ -49,45 +47,5 @@ export const smmChargerOpRoute: Routes = [
             pageTitle: 'SmmChargerOps'
         },
         canActivate: [UserRouteAccessService]
-    },
-    {
-        path: 'new',
-        component: SmmChargerOpUpdateComponent,
-        resolve: {
-            smmChargerOp: SmmChargerOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmmChargerOps'
-        },
-        canActivate: [UserRouteAccessService]
-    },
-    {
-        path: ':id/edit',
-        component: SmmChargerOpUpdateComponent,
-        resolve: {
-            smmChargerOp: SmmChargerOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmmChargerOps'
-        },
-        canActivate: [UserRouteAccessService]
-    }
-];
-
-export const smmChargerOpPopupRoute: Routes = [
-    {
-        path: ':id/delete',
-        component: SmmChargerOpDeletePopupComponent,
-        resolve: {
-            smmChargerOp: SmmChargerOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'SmmChargerOps'
-        },
-        canActivate: [UserRouteAccessService],
-        outlet: 'popup'
     }
 ];

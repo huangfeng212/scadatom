@@ -8,8 +8,6 @@ import { ElectronOp } from 'app/shared/model/electron-op.model';
 import { ElectronOpService } from './electron-op.service';
 import { ElectronOpComponent } from './electron-op.component';
 import { ElectronOpDetailComponent } from './electron-op-detail.component';
-import { ElectronOpUpdateComponent } from './electron-op-update.component';
-import { ElectronOpDeletePopupComponent } from './electron-op-delete-dialog.component';
 import { IElectronOp } from 'app/shared/model/electron-op.model';
 
 @Injectable({ providedIn: 'root' })
@@ -49,45 +47,5 @@ export const electronOpRoute: Routes = [
             pageTitle: 'ElectronOps'
         },
         canActivate: [UserRouteAccessService]
-    },
-    {
-        path: 'new',
-        component: ElectronOpUpdateComponent,
-        resolve: {
-            electronOp: ElectronOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'ElectronOps'
-        },
-        canActivate: [UserRouteAccessService]
-    },
-    {
-        path: ':id/edit',
-        component: ElectronOpUpdateComponent,
-        resolve: {
-            electronOp: ElectronOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'ElectronOps'
-        },
-        canActivate: [UserRouteAccessService]
-    }
-];
-
-export const electronOpPopupRoute: Routes = [
-    {
-        path: ':id/delete',
-        component: ElectronOpDeletePopupComponent,
-        resolve: {
-            electronOp: ElectronOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'ElectronOps'
-        },
-        canActivate: [UserRouteAccessService],
-        outlet: 'popup'
     }
 ];

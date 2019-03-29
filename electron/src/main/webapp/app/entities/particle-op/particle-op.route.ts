@@ -8,8 +8,6 @@ import { ParticleOp } from 'app/shared/model/particle-op.model';
 import { ParticleOpService } from './particle-op.service';
 import { ParticleOpComponent } from './particle-op.component';
 import { ParticleOpDetailComponent } from './particle-op-detail.component';
-import { ParticleOpUpdateComponent } from './particle-op-update.component';
-import { ParticleOpDeletePopupComponent } from './particle-op-delete-dialog.component';
 import { IParticleOp } from 'app/shared/model/particle-op.model';
 
 @Injectable({ providedIn: 'root' })
@@ -49,45 +47,5 @@ export const particleOpRoute: Routes = [
             pageTitle: 'ParticleOps'
         },
         canActivate: [UserRouteAccessService]
-    },
-    {
-        path: 'new',
-        component: ParticleOpUpdateComponent,
-        resolve: {
-            particleOp: ParticleOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'ParticleOps'
-        },
-        canActivate: [UserRouteAccessService]
-    },
-    {
-        path: ':id/edit',
-        component: ParticleOpUpdateComponent,
-        resolve: {
-            particleOp: ParticleOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'ParticleOps'
-        },
-        canActivate: [UserRouteAccessService]
-    }
-];
-
-export const particleOpPopupRoute: Routes = [
-    {
-        path: ':id/delete',
-        component: ParticleOpDeletePopupComponent,
-        resolve: {
-            particleOp: ParticleOpResolve
-        },
-        data: {
-            authorities: ['ROLE_USER'],
-            pageTitle: 'ParticleOps'
-        },
-        canActivate: [UserRouteAccessService],
-        outlet: 'popup'
     }
 ];

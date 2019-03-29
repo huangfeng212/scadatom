@@ -1,12 +1,6 @@
 <div>
     <h2 id="page-heading">
         <span>Sms Device Ops</span>
-        <button id="jh-create-entity" class="btn btn-primary float-right jh-create-entity create-sms-device-op" [routerLink]="['/sms-device-op/new']">
-            <fa-icon [icon]="'plus'"></fa-icon>
-            <span >
-            Create new Sms Device Op
-            </span>
-        </button>
     </h2>
     <jhi-alert></jhi-alert>
     <br/>
@@ -32,20 +26,6 @@
                                 class="btn btn-info btn-sm">
                             <fa-icon [icon]="'eye'"></fa-icon>
                             <span class="d-none d-md-inline">View</span>
-                        </button>
-                        <button type="submit"
-                                [routerLink]="['/sms-device-op', smsDeviceOp.id, 'edit']"
-                                class="btn btn-primary btn-sm">
-                            <fa-icon [icon]="'pencil-alt'"></fa-icon>
-                            <span class="d-none d-md-inline">Edit</span>
-                        </button>
-                        <button type="submit"
-                                [routerLink]="['/', 'sms-device-op', { outlets: { popup: smsDeviceOp.id + '/delete'} }]"
-                                replaceUrl="true"
-                                queryParamsHandling="merge"
-                                class="btn btn-danger btn-sm">
-                            <fa-icon [icon]="'times'"></fa-icon>
-                            <span class="d-none d-md-inline">Delete</span>
                         </button>
                     </div>
                 </td>
