@@ -135,9 +135,9 @@ public class ParticleOp implements Serializable {
     public String toString() {
         return "ParticleOp{" +
             "id=" + getId() +
+            ", value='" + getValue() + "'" +
             ", state='" + getState() + "'" +
             ", dt='" + getDt() + "'" +
-            ", value='" + getValue() + "'" +
             ", writtenBy='" + getWrittenBy() + "'" +
             ", writtenDt='" + getWrittenDt() + "'" +
             "}";

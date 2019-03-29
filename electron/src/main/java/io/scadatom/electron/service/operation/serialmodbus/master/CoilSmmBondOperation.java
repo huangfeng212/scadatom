@@ -62,4 +62,16 @@ public class CoilSmmBondOperation extends SmmBondOperation implements CommandWat
   public void clearCommand() {
     cmd = null;
   }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CoilSmmBondOperation{");
+        sb.append("readRequest=").append(readRequest);
+        sb.append(", writeRequest=").append(writeRequest);
+        sb.append(", cmd='").append(cmd).append('\'');
+        sb.append(", refStart=").append(refStart);
+        sb.append(", addr=").append(addr);
+        sb.append('}');
+        return sb.toString();
+    }
 }

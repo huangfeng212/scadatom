@@ -16,4 +16,12 @@ public abstract class SmsBondOperation implements ValueWatcher {
     regStart = Integer.decode(this.smsBondDTO.getReg());
     opEventService.addValueWatcher(smsBondDTO.getParticle().getId(), this);
   }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SmsBondOperation{");
+        sb.append("regStart=").append(regStart);
+        sb.append('}');
+        return sb.toString();
+    }
 }

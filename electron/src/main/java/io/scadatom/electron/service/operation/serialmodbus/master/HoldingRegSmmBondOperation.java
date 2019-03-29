@@ -82,14 +82,15 @@ public class HoldingRegSmmBondOperation extends SmmBondOperation implements Comm
     cmd = null;
   }
 
-  @Override
-  public String toString() {
-    final StringBuilder sb = new StringBuilder("HoldingRegSmmBondOperation{");
-    sb.append("cmd=").append(cmd);
-    sb.append(", refStart=").append(refStart);
-    sb.append(", addr=").append(addr);
-    sb.append(", sts=").append(sts);
-    sb.append('}');
-    return sb.toString();
-  }
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("HoldingRegSmmBondOperation{");
+        sb.append("readRequest=").append(readRequest);
+        sb.append(", writeRequest=").append(writeRequest);
+        sb.append(", cmd='").append(cmd).append('\'');
+        sb.append(", refStart=").append(refStart);
+        sb.append(", addr=").append(addr);
+        sb.append('}');
+        return sb.toString();
+    }
 }

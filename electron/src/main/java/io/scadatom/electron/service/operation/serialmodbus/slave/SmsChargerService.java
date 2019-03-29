@@ -6,7 +6,7 @@ import com.ghgande.j2mod.modbus.procimg.SimpleProcessImage;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 import io.scadatom.electron.service.AbstractChargerService;
 import io.scadatom.electron.service.operation.OpEventService;
-import io.scadatom.electron.service.operation.OpDataService;
+import io.scadatom.electron.service.operation.OpRepoService;
 import io.scadatom.electron.service.util.SerialPortUtil;
 import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.OpState;
@@ -25,7 +25,7 @@ public class SmsChargerService extends AbstractChargerService {
   private final Logger log = LoggerFactory.getLogger(SmsChargerService.class);
 
   private final OpEventService opEventService;
-  private final OpDataService opDataService;
+  private final OpRepoService opRepoService;
   private final Map<Integer, ProcessImage> processImageMap = new HashMap<>();
   private SerialParameters serialParameters;
   private ModbusSerialListener listener;
@@ -35,16 +35,16 @@ public class SmsChargerService extends AbstractChargerService {
   private Map<Long, SmsBondDTO> smsBondDTOMap = new HashMap<>();
   private Map<Long, SmsBondOperation> smsBondOperationMap = new HashMap<>();
 
-  public SmsChargerService(OpEventService opEventService, OpDataService opDataService) {
+  public SmsChargerService(OpEventService opEventService, OpRepoService opRepoService) {
     this.opEventService = opEventService;
-    this.opDataService = opDataService;
+    this.opRepoService = opRepoService;
   }
 
   @Override
   public void start() {
     log.info("opening port {} and starting listener ...", serialParameters.getPortName());
     listenerThread.start();
-    opDataService.updateSmsChargerOp(
+    opRepoService.updateSmsChargerOp(
         smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Started));
   }
 
@@ -59,20 +59,18 @@ public class SmsChargerService extends AbstractChargerService {
           "joining listener thread failed. {}, {}", ex.getClass().getSimpleName(), ex.getMessage());
     }
     processImageMap.clear();
-    opDataService.updateSmsChargerOp(
+    opRepoService.updateSmsChargerOp(
         smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Stopped));
   }
 
   @Override
   public void initialize(ElectronInitReq config) {
     smsChargerDTO = config.getSmsChargerDTO();
-    if (smsChargerDTO == null) { // TODO can not ref null
-      //      opDataService.updateSmsChargerOp(
-      //          smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Undefined));
+    if (smsChargerDTO == null) {
       return;
     }
     if (!smsChargerDTO.getEnabled()) {
-      opDataService.updateSmsChargerOp(
+      opRepoService.updateSmsChargerOp(
           smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Disabled));
       return;
     }
@@ -123,19 +121,19 @@ public class SmsChargerService extends AbstractChargerService {
                                         smsBondDTO, spi, opEventService));
                                 break;
                             }
-                            opDataService.updateSmsBondOp(
+                            opRepoService.updateSmsBondOp(
                                 smsBondDTO.getId(),
                                 smsBondOp -> smsBondOp.setState(OpState.Initialized));
                           } else {
-                            opDataService.updateSmsBondOp(
+                            opRepoService.updateSmsBondOp(
                                 smsBondDTO.getId(),
                                 smsBondOp -> smsBondOp.setState(OpState.Disabled));
                           }
                         });
-                opDataService.updateSmsDeviceOp(
+                opRepoService.updateSmsDeviceOp(
                     smsDeviceDTO.getId(), smsDeviceOp -> smsDeviceOp.setState(OpState.Initialized));
               } else {
-                opDataService.updateSmsDeviceOp(
+                opRepoService.updateSmsDeviceOp(
                     smsDeviceDTO.getId(), smsDeviceOp -> smsDeviceOp.setState(OpState.Disabled));
               }
             });
@@ -151,13 +149,13 @@ public class SmsChargerService extends AbstractChargerService {
         new MultiDeviceModbusSerialListener(
             serialParameters, smsChargerDTO.getRespDelay(), processImageMap);
     listenerThread = new Thread(listener, "SmsCharger Service Listener");
-    opDataService.updateSmsChargerOp(
+    opRepoService.updateSmsChargerOp(
         smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Initialized));
   }
 
   @Override
   public OpState getState() {
-    return opDataService.getSmsChargerOp(smsChargerDTO.getId()).getState();
+    return opRepoService.getSmsChargerOp(smsChargerDTO.getId()).getState();
   }
 
   @Override

@@ -55,4 +55,14 @@ public class InputRegSmmBondOperation extends SmmBondOperation {
     throw new IllegalStateException(
         "should not call getWriteRequest() on InputReg, check isWritable() before calling");
   }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("InputRegSmmBondOperation{");
+        sb.append("readRequest=").append(readRequest);
+        sb.append(", refStart=").append(refStart);
+        sb.append(", addr=").append(addr);
+        sb.append('}');
+        return sb.toString();
+    }
 }

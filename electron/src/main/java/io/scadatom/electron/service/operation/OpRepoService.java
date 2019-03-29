@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OpDataService {
+public class OpRepoService {
 
-  private final Logger log = LoggerFactory.getLogger(OpDataService.class);
+  private final Logger log = LoggerFactory.getLogger(OpRepoService.class);
 
   private final ElectronOpRepository electronOpRepository;
   private final ParticleOpRepository particleOpRepository;
@@ -37,7 +37,7 @@ public class OpDataService {
   private final SmsDeviceOpRepository smsDeviceOpRepository;
   private final SmsBondOpRepository smsBondOpRepository;
 
-  public OpDataService(
+  public OpRepoService(
       ElectronOpRepository electronOpRepository,
       ParticleOpRepository particleOpRepository,
       SmmChargerOpRepository smmChargerOpRepository,
@@ -57,7 +57,8 @@ public class OpDataService {
   }
 
   public ElectronOp updateElectronOp(long id, Consumer<ElectronOp> opConsumer) {
-    ElectronOp electronOp = electronOpRepository.findById(id).orElse(new ElectronOp().id(id));
+    ElectronOp electronOp =
+        electronOpRepository.findById(id).orElse(new ElectronOp().id(id).state(OpState.Undefined));
     electronOp.setDt(Instant.now());
     opConsumer.accept(electronOp);
     log.trace(electronOp.toString());
@@ -71,7 +72,8 @@ public class OpDataService {
   }
 
   public ParticleOp updateParticleOp(long id, Consumer<ParticleOp> opConsumer) {
-    ParticleOp particleOp = particleOpRepository.findById(id).orElse(new ParticleOp().id(id));
+    ParticleOp particleOp =
+        particleOpRepository.findById(id).orElse(new ParticleOp().id(id).state(OpState.Undefined));
     particleOp.setDt(Instant.now());
     opConsumer.accept(particleOp);
     log.trace(particleOp.toString());
@@ -86,7 +88,9 @@ public class OpDataService {
 
   public SmmChargerOp updateSmmChargerOp(long id, Consumer<SmmChargerOp> opConsumer) {
     SmmChargerOp smmChargerOp =
-        smmChargerOpRepository.findById(id).orElse(new SmmChargerOp().id(id));
+        smmChargerOpRepository
+            .findById(id)
+            .orElse(new SmmChargerOp().id(id).state(OpState.Undefined));
     smmChargerOp.setDt(Instant.now());
     opConsumer.accept(smmChargerOp);
     log.trace(smmChargerOp.toString());
@@ -100,7 +104,10 @@ public class OpDataService {
   }
 
   public SmmDeviceOp updateSmmDeviceOp(long id, Consumer<SmmDeviceOp> opConsumer) {
-    SmmDeviceOp smmDeviceOp = smmDeviceOpRepository.findById(id).orElse(new SmmDeviceOp().id(id));
+    SmmDeviceOp smmDeviceOp =
+        smmDeviceOpRepository
+            .findById(id)
+            .orElse(new SmmDeviceOp().id(id).state(OpState.Undefined));
     smmDeviceOp.setDt(Instant.now());
     opConsumer.accept(smmDeviceOp);
     log.trace(smmDeviceOp.toString());
@@ -114,7 +121,8 @@ public class OpDataService {
   }
 
   public SmmBondOp updateSmmBondOp(long id, Consumer<SmmBondOp> opConsumer) {
-    SmmBondOp smmBondOp = smmBondOpRepository.findById(id).orElse(new SmmBondOp().id(id));
+    SmmBondOp smmBondOp =
+        smmBondOpRepository.findById(id).orElse(new SmmBondOp().id(id).state(OpState.Undefined));
     smmBondOp.setDt(Instant.now());
     opConsumer.accept(smmBondOp);
     log.trace(smmBondOp.toString());
@@ -127,7 +135,9 @@ public class OpDataService {
 
   public SmsChargerOp updateSmsChargerOp(long id, Consumer<SmsChargerOp> opConsumer) {
     SmsChargerOp smsChargerOp =
-        smsChargerOpRepository.findById(id).orElse(new SmsChargerOp().id(id));
+        smsChargerOpRepository
+            .findById(id)
+            .orElse(new SmsChargerOp().id(id).state(OpState.Undefined));
     smsChargerOp.setDt(Instant.now());
     opConsumer.accept(smsChargerOp);
     log.trace(smsChargerOp.toString());
@@ -141,7 +151,10 @@ public class OpDataService {
   }
 
   public SmsDeviceOp updateSmsDeviceOp(long id, Consumer<SmsDeviceOp> opConsumer) {
-    SmsDeviceOp smsDeviceOp = smsDeviceOpRepository.findById(id).orElse(new SmsDeviceOp().id(id));
+    SmsDeviceOp smsDeviceOp =
+        smsDeviceOpRepository
+            .findById(id)
+            .orElse(new SmsDeviceOp().id(id).state(OpState.Undefined));
     smsDeviceOp.setDt(Instant.now());
     opConsumer.accept(smsDeviceOp);
     log.trace(smsDeviceOp.toString());
@@ -155,7 +168,8 @@ public class OpDataService {
   }
 
   public SmsBondOp updateSmsBondOp(long id, Consumer<SmsBondOp> opConsumer) {
-    SmsBondOp smsBondOp = smsBondOpRepository.findById(id).orElse(new SmsBondOp().id(id));
+    SmsBondOp smsBondOp =
+        smsBondOpRepository.findById(id).orElse(new SmsBondOp().id(id).state(OpState.Undefined));
     smsBondOp.setDt(Instant.now());
     opConsumer.accept(smsBondOp);
     log.trace(smsBondOp.toString());

@@ -7,6 +7,7 @@ import com.ghgande.j2mod.modbus.util.Observer;
 import io.scadatom.electron.service.operation.OpEventService;
 import io.scadatom.neutron.SmsBondDTO;
 import io.scadatom.neutron.ValueType;
+import java.util.Arrays;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import org.apache.commons.lang3.ArrayUtils;
@@ -41,18 +42,20 @@ public class HoldingRegSmsBondOperation extends SmsBondOperation implements Obse
 
   @Override
   public void onValueChange(String newValue) {
-    try {
-      if (smsBondDTO.getValueType() == ValueType.Fp32) {
-        float newVal = (float) exprIn.setVariable("x", Double.parseDouble(newValue)).evaluate();
-        byte[] bytes = ModbusUtil.floatToRegisters(newVal);
-        storage[0].setValueOnly(new byte[] {bytes[0], bytes[1]});
-        storage[1].setValueOnly(new byte[] {bytes[2], bytes[3]});
-      } else {
-        int newVal = (int) exprIn.setVariable("x", Double.parseDouble(newValue)).evaluate();
-        storage[0].setValueOnly(newVal);
+    if (smsBondDTO.getEnabled()) {
+      try {
+        if (smsBondDTO.getValueType() == ValueType.Fp32) {
+          float newVal = (float) exprIn.setVariable("x", Double.parseDouble(newValue)).evaluate();
+          byte[] bytes = ModbusUtil.floatToRegisters(newVal);
+          storage[0].setValueOnly(new byte[] {bytes[0], bytes[1]});
+          storage[1].setValueOnly(new byte[] {bytes[2], bytes[3]});
+        } else {
+          int newVal = (int) exprIn.setVariable("x", Double.parseDouble(newValue)).evaluate();
+          storage[0].setValueOnly(newVal);
+        }
+      } catch (NumberFormatException e) {
+        e.printStackTrace();
       }
-    } catch (NumberFormatException e) {
-      e.printStackTrace();
     }
   }
 
@@ -63,26 +66,37 @@ public class HoldingRegSmsBondOperation extends SmsBondOperation implements Obse
    */
   @Override
   public void update(Observable o, Object arg) {
-    double cmdRaw, cmd;
-    switch (smsBondDTO.getValueType()) {
-      case Fp32:
-        cmdRaw =
-            ModbusUtil.registersToFloat(
-                ArrayUtils.addAll(storage[0].toBytes(), storage[1].toBytes()));
-        cmd = exprOut.setVariable("x", cmdRaw).evaluate();
-        break;
-      case Uint16:
-        cmdRaw = storage[0].toUnsignedShort();
-        cmd = exprOut.setVariable("x", cmdRaw).evaluate();
-        break;
-      case Int16:
-        cmdRaw = storage[0].toShort();
-        cmd = exprOut.setVariable("x", cmdRaw).evaluate();
-        break;
-      default:
-        throw new IllegalArgumentException("regType invalid");
+    if (smsBondDTO.getEnabled()) {
+      double cmdRaw, cmd;
+      switch (smsBondDTO.getValueType()) {
+        case Fp32:
+          cmdRaw =
+              ModbusUtil.registersToFloat(
+                  ArrayUtils.addAll(storage[0].toBytes(), storage[1].toBytes()));
+          cmd = exprOut.setVariable("x", cmdRaw).evaluate();
+          break;
+        case Uint16:
+          cmdRaw = storage[0].toUnsignedShort();
+          cmd = exprOut.setVariable("x", cmdRaw).evaluate();
+          break;
+        case Int16:
+          cmdRaw = storage[0].toShort();
+          cmd = exprOut.setVariable("x", cmdRaw).evaluate();
+          break;
+        default:
+          throw new IllegalArgumentException("regType invalid");
+      }
+      opEventService.onCommandWritten(
+          smsBondDTO.getParticle().getId(), String.valueOf(cmd), "SmsBond_" + smsBondDTO.getId());
     }
-    opEventService.onCommandWritten(
-        smsBondDTO.getParticle().getId(), String.valueOf(cmd), "SmsBond_" + smsBondDTO.getId());
   }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("HoldingRegSmsBondOperation{");
+        sb.append("storage=").append(Arrays.toString(storage));
+        sb.append(", regStart=").append(regStart);
+        sb.append('}');
+        return sb.toString();
+    }
 }

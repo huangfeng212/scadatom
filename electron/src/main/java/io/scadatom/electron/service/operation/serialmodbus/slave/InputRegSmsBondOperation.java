@@ -34,18 +34,20 @@ public class InputRegSmsBondOperation extends SmsBondOperation {
 
   @Override
   public void onValueChange(String newValue) {
-    try {
-      if (smsBondDTO.getValueType() == ValueType.Fp32) {
-        float newVal = (float) exprIn.setVariable("x", Double.parseDouble(newValue)).evaluate();
-        byte[] bytes = ModbusUtil.floatToRegisters(newVal);
-        storage[0].setValue(new byte[] {bytes[0], bytes[1]});
-        storage[1].setValue(new byte[] {bytes[2], bytes[3]});
-      } else {
-        int newVal = (int) exprIn.setVariable("x", Double.parseDouble(newValue)).evaluate();
-        storage[0].setValue(newVal);
+    if (smsBondDTO.getEnabled()) {
+      try {
+        if (smsBondDTO.getValueType() == ValueType.Fp32) {
+          float newVal = (float) exprIn.setVariable("x", Double.parseDouble(newValue)).evaluate();
+          byte[] bytes = ModbusUtil.floatToRegisters(newVal);
+          storage[0].setValue(new byte[] {bytes[0], bytes[1]});
+          storage[1].setValue(new byte[] {bytes[2], bytes[3]});
+        } else {
+          int newVal = (int) exprIn.setVariable("x", Double.parseDouble(newValue)).evaluate();
+          storage[0].setValue(newVal);
+        }
+      } catch (NumberFormatException e) {
+        e.printStackTrace();
       }
-    } catch (NumberFormatException e) {
-      e.printStackTrace();
     }
   }
 

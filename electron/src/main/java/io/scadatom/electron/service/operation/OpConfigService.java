@@ -1,8 +1,14 @@
 package io.scadatom.electron.service.operation;
 
+import static io.scadatom.electron.config.RabbitmqConfig.ROUTING_TO_NUCLEUS;
+import static io.scadatom.electron.config.RabbitmqConfig.TOPIC_SCADATOM;
+import static io.scadatom.neutron.Intents.REGISTER_ELECTRON;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.scadatom.neutron.ElectronInitReq;
-import io.scadatom.neutron.ParticleDTO;
+import io.scadatom.neutron.FlattenedMessage;
+import io.scadatom.neutron.OpCtrlReq;
+import io.scadatom.neutron.OpException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,13 +26,17 @@ public class OpConfigService {
   private final Logger log = LoggerFactory.getLogger(OpConfigService.class);
   private final ObjectMapper objectMapper;
   private final Long electronId;
+  private final RabbitTemplate rabbitTemplate;
+  private Optional<ElectronInitReq> config = Optional.empty();
+  private Map<Long, ParticleOperation> particleOperationMap = new HashMap<>();
 
-  private Optional<ElectronInitReq> config;
-  private Map<Long, ParticleDTO> particleDTOMap = new HashMap<>();
-
-  public OpConfigService(ObjectMapper objectMapper, @Value("${electron.id}") Long electronId) {
+  public OpConfigService(
+      ObjectMapper objectMapper,
+      @Value("${electron.id}") Long electronId,
+      RabbitTemplate rabbitTemplate) {
     this.objectMapper = objectMapper;
     this.electronId = electronId;
+    this.rabbitTemplate = rabbitTemplate;
     loadConfig();
   }
 
@@ -38,24 +49,41 @@ public class OpConfigService {
                       + File.separator
                       + String.format(CONFIG_FILE_PATTERN, electronId)),
               ElectronInitReq.class);
-      if (electronInitReq.getElectronDTO().getId().equals(electronId)) {
-        config = Optional.of(electronInitReq);
-        processConfig();
-      } else {
-        log.error("config file has invalid electron id");
-      }
+      config = Optional.of(electronInitReq);
+      processConfig();
     } catch (IOException e) {
-      log.error("error loading config from disk");
+      log.error("error loading config from disk, try registering with nucleus");
+      try {
+        ElectronInitReq resp = registerElectron();
+        saveConfig(resp);
+        config = Optional.of(resp);
+      } catch (IOException | OpException e1) {
+        log.error("error loading config from nucleus");
+      }
     }
   }
 
   private void processConfig() {
-    particleDTOMap.clear();
+    particleOperationMap.clear();
     config.ifPresent(
         electronInitReq ->
             electronInitReq
                 .getParticleDTOS()
-                .forEach(particleDTO -> particleDTOMap.put(particleDTO.getId(), particleDTO)));
+                .forEach(
+                    particleDTO -> {
+                      particleOperationMap.put(
+                          particleDTO.getId(), new ParticleOperation(particleDTO));
+                    }));
+  }
+
+  private ElectronInitReq registerElectron() throws IOException, OpException {
+    OpCtrlReq opCtrlReq = new OpCtrlReq().id(electronId);
+    Object resp =
+        rabbitTemplate.convertSendAndReceive(
+            TOPIC_SCADATOM,
+            ROUTING_TO_NUCLEUS,
+            new FlattenedMessage(REGISTER_ELECTRON, opCtrlReq).flat());
+    return FlattenedMessage.parseResp(resp, ElectronInitReq.class);
   }
 
   public void saveConfig(ElectronInitReq config) {
@@ -79,7 +107,7 @@ public class OpConfigService {
     return config;
   }
 
-  public Optional<ParticleDTO> getParticleDTO(long particleId) {
-    return Optional.ofNullable(particleDTOMap.get(particleId));
+  public Optional<ParticleOperation> getParticleOperation(long particleId) {
+    return Optional.ofNullable(particleOperationMap.get(particleId));
   }
 }

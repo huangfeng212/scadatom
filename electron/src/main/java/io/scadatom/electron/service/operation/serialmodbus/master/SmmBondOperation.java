@@ -27,4 +27,13 @@ public abstract class SmmBondOperation {
   public SmmBondDTO getSmmBondDTO() {
     return smmBondDTO;
   }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SmmBondOperation{");
+        sb.append("refStart=").append(refStart);
+        sb.append(", addr=").append(addr);
+        sb.append('}');
+        return sb.toString();
+    }
 }

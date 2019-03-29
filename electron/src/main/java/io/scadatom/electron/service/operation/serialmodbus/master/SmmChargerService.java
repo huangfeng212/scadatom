@@ -12,8 +12,8 @@ import com.ghgande.j2mod.modbus.net.SerialConnection;
 import com.ghgande.j2mod.modbus.util.SerialParameters;
 import io.scadatom.electron.service.AbstractChargerService;
 import io.scadatom.electron.service.operation.CommandWatcher;
-import io.scadatom.electron.service.operation.OpDataService;
 import io.scadatom.electron.service.operation.OpEventService;
+import io.scadatom.electron.service.operation.OpRepoService;
 import io.scadatom.electron.service.util.DoubleUtil;
 import io.scadatom.electron.service.util.SerialPortUtil;
 import io.scadatom.neutron.ElectronInitReq;
@@ -38,7 +38,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
   private final Logger log = LoggerFactory.getLogger(SmmChargerService.class);
 
   private final OpEventService opEventService;
-  private final OpDataService opDataService;
+  private final OpRepoService opRepoService;
   private SerialParameters serialParameters;
   private AbstractSerialConnection abstractSerialConnection;
   private ModbusSerialTransaction modbusSerialTransaction;
@@ -50,9 +50,9 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
   private Map<Long, SmmBondOperation> smmBondOperationMap =
       new HashMap<>(); // only enabled bonds enters here
 
-  public SmmChargerService(OpEventService opEventService, OpDataService opDataService) {
+  public SmmChargerService(OpEventService opEventService, OpRepoService opRepoService) {
     this.opEventService = opEventService;
-    this.opDataService = opDataService;
+    this.opRepoService = opRepoService;
   }
 
   @Override
@@ -65,7 +65,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
     log.info("starting polling thread ...");
     updateFlag = true;
     updateThread.start();
-    opDataService.updateSmmChargerOp(
+    opRepoService.updateSmmChargerOp(
         smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Started));
   }
 
@@ -81,25 +81,22 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
     }
     log.info("stopping port {} ...", serialParameters.getPortName());
     abstractSerialConnection.close(); // todo can this be closed if already closed?
-    opDataService.updateSmmChargerOp(
+    opRepoService.updateSmmChargerOp(
         smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Stopped));
-        //TODO unregister cmd/sts watcher
   }
 
   @Override
   public void initialize(@NotNull ElectronInitReq config) {
     smmChargerDTO = config.getSmmChargerDTO();
-    if (smmChargerDTO == null) { // TODO can not ref null
-      //      opDataService.updateSmmChargerOp(
-      //          smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Undefined));
+    if (smmChargerDTO == null) {
       return;
     }
     if (!smmChargerDTO.getEnabled()) {
-      opDataService.updateSmmChargerOp(
+      opRepoService.updateSmmChargerOp(
           smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Disabled));
       return;
     }
-    opDataService.updateSmmChargerOp(
+    opRepoService.updateSmmChargerOp(
         smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Uninitialized));
     // load into data structure
     config
@@ -126,7 +123,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                                 CoilSmmBondOperation coilSmmBondOperation =
                                     new CoilSmmBondOperation(smmDeviceDTO, smmBondDTO);
                                 smmBondOperationMap.put(smmBondDTO.getId(), coilSmmBondOperation);
-                                opDataService.updateSmmBondOp(
+                                opRepoService.updateSmmBondOp(
                                     smmBondDTO.getId(),
                                     smmBondOp -> {
                                       smmBondOp.setReadRequest(
@@ -140,7 +137,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                                     new InputDiscreteSmmBondOperation(smmDeviceDTO, smmBondDTO);
                                 smmBondOperationMap.put(
                                     smmBondDTO.getId(), inputDiscreteSmmBondOperation);
-                                opDataService.updateSmmBondOp(
+                                opRepoService.updateSmmBondOp(
                                     smmBondDTO.getId(),
                                     smmBondOp -> {
                                       smmBondOp.setReadRequest(
@@ -154,7 +151,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                                     new InputRegSmmBondOperation(smmDeviceDTO, smmBondDTO);
                                 smmBondOperationMap.put(
                                     smmBondDTO.getId(), inputRegSmmBondOperation);
-                                opDataService.updateSmmBondOp(
+                                opRepoService.updateSmmBondOp(
                                     smmBondDTO.getId(),
                                     smmBondOp -> {
                                       smmBondOp.setReadRequest(
@@ -170,7 +167,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                                     smmBondDTO.getId(), holdingRegSmmBondOperation);
                                 opEventService.addCommandWatcher(
                                     smmBondDTO.getParticle().getId(), holdingRegSmmBondOperation);
-                                opDataService.updateSmmBondOp(
+                                opRepoService.updateSmmBondOp(
                                     smmBondDTO.getId(),
                                     smmBondOp -> {
                                       smmBondOp.setReadRequest(
@@ -180,19 +177,19 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                                     });
                                 break;
                             }
-                            opDataService.updateSmmBondOp(
+                            opRepoService.updateSmmBondOp(
                                 smmBondDTO.getId(),
                                 smmBondOp -> smmBondOp.setState(OpState.Initialized));
                           } else {
-                            opDataService.updateSmmBondOp(
+                            opRepoService.updateSmmBondOp(
                                 smmBondDTO.getId(),
                                 smmBondOp -> smmBondOp.setState(OpState.Disabled));
                           }
                         });
-                opDataService.updateSmmDeviceOp(
+                opRepoService.updateSmmDeviceOp(
                     smmDeviceDTO.getId(), smmDeviceOp -> smmDeviceOp.setState(OpState.Initialized));
               } else {
-                opDataService.updateSmmDeviceOp(
+                opRepoService.updateSmmDeviceOp(
                     smmDeviceDTO.getId(), smmDeviceOp -> smmDeviceOp.setState(OpState.Disabled));
               }
             });
@@ -207,13 +204,13 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
     abstractSerialConnection = new SerialConnection(serialParameters);
     abstractSerialConnection.setTimeout(this.smmChargerDTO.getTimeout());
     updateThread = new Thread(this, "SmmCharger Service Poller");
-    opDataService.updateSmmChargerOp(
+    opRepoService.updateSmmChargerOp(
         smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Initialized));
   }
 
   @Override
   public OpState getState() {
-    return opDataService.getSmmChargerOp(smmChargerDTO.getId()).getState();
+    return opRepoService.getSmmChargerOp(smmChargerDTO.getId()).getState();
   }
 
   @Override
@@ -252,30 +249,30 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
         modbusSerialTransaction.setRequest(smmBondOperation.getReadRequest());
         modbusSerialTransaction.execute();
         modbusResponse = modbusSerialTransaction.getResponse();
-        double readSts = smmBondOperation.parseReadResponse(modbusResponse);
+        double readValue = smmBondOperation.parseReadResponse(modbusResponse);
         ModbusResponse finalModbusResponse1 = modbusResponse;
-        opDataService.updateSmmBondOp(
+        opRepoService.updateSmmBondOp(
             smmBondOperation.getSmmBondDTO().getId(),
             smmBondOp -> {
               smmBondOp.setPollStatus(SmmPollStatus.Normal);
               smmBondOp.setReadResponse(finalModbusResponse1.getHexMessage());
             });
-          opEventService.onValueRead(
-              smmBondOperation.getSmmBondDTO().getParticle().getId(),
-              String.valueOf(smmBondOperation.getSts()),
-              "SmmBond_" + smmBondOperation.getSmmBondDTO().getId());
-        if (smmBondOperation.isWritable() && smmBondOperation instanceof CommandWatcher) {
+        opEventService.onValueRead(
+            smmBondOperation.getSmmBondDTO().getParticle().getId(),
+            readValue,
+            "SmmBond_" + smmBondOperation.getSmmBondDTO().getId());
+        if (smmBondOperation instanceof CommandWatcher) {
           CommandWatcher commandWatcher = (CommandWatcher) smmBondOperation;
           if (commandWatcher.hasPendingCommand()) {
             if (!DoubleUtil.doubleEqual(
-                smmBondOperation.getSts(),
+                readValue,
                 Double.valueOf(commandWatcher.getCommand()))) { // command is not applied yet
               log.debug(
-                  "SmmBond {} writing cmd {} to particle {}, when sts is {}",
+                  "SmmBond {} writing cmd {} to particle {}, when readValue is {}",
                   smmBondOperation.getSmmBondDTO().getId(),
                   commandWatcher.getCommand(),
                   smmBondOperation.getSmmBondDTO().getParticle().getId(),
-                  smmBondOperation.getSts());
+                  readValue);
               try {
                 synchronized (this) {
                   modbusSerialTransaction.setRequest(smmBondOperation.getWriteRequest());
@@ -283,7 +280,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
                   modbusResponse = modbusSerialTransaction.getResponse();
                 }
                 ModbusResponse finalModbusResponse = modbusResponse;
-                opDataService.updateSmmBondOp(
+                opRepoService.updateSmmBondOp(
                     smmBondOperation.getSmmBondDTO().getId(),
                     smmBondOp -> {
                       smmBondOp.setWriteRequest(smmBondOperation.getWriteRequest().getHexMessage());
@@ -300,15 +297,15 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
         }
       }
     } catch (ModbusIOException e) {
-      opDataService.updateSmmBondOp(
+      opRepoService.updateSmmBondOp(
           smmBondOperation.getSmmBondDTO().getId(),
           smmBondOp -> smmBondOp.setPollStatus(SmmPollStatus.IOError));
     } catch (ModbusSlaveException e) {
-      opDataService.updateSmmBondOp(
+      opRepoService.updateSmmBondOp(
           smmBondOperation.getSmmBondDTO().getId(),
           smmBondOp -> smmBondOp.setPollStatus(SmmPollStatus.fromModbusSlaveException(e)));
     } catch (ModbusException e) {
-      opDataService.updateSmmBondOp(
+      opRepoService.updateSmmBondOp(
           smmBondOperation.getSmmBondDTO().getId(),
           smmBondOp -> smmBondOp.setPollStatus(SmmPollStatus.UnknownError));
       e.printStackTrace();

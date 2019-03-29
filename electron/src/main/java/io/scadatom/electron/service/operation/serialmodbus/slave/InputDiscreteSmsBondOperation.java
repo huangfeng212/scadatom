@@ -20,15 +20,26 @@ public class InputDiscreteSmsBondOperation extends SmsBondOperation {
 
   @Override
   public void onValueChange(String newValue) {
-    switch (DoubleUtil.toInt(Double.parseDouble(newValue))) {
-      case 1:
-        storage.set(true);
-        break;
-      case 0:
-        storage.set(false);
-        break;
-      default:
-        throw new IllegalArgumentException("only 0 or 1 allowed");
+    if (smsBondDTO.getEnabled()) {
+      switch (DoubleUtil.toInt(Double.parseDouble(newValue))) {
+        case 1:
+          storage.set(true);
+          break;
+        case 0:
+          storage.set(false);
+          break;
+        default:
+          throw new IllegalArgumentException("only 0 or 1 allowed");
+      }
     }
   }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("InputDiscreteSmsBondOperation{");
+        sb.append("storage=").append(storage);
+        sb.append(", regStart=").append(regStart);
+        sb.append('}');
+        return sb.toString();
+    }
 }

@@ -1,11 +1,8 @@
 package io.scadatom.electron.service.operation;
 
-import static io.scadatom.electron.config.RabbitmqConfig.ROUTING_TO_NUCLEUS;
-import static io.scadatom.electron.config.RabbitmqConfig.TOPIC_SCADATOM;
 import static io.scadatom.neutron.Intents.CTRL_ELECTRON;
 import static io.scadatom.neutron.Intents.CTRL_PARTICLE;
 import static io.scadatom.neutron.Intents.INIT_ELECTRON;
-import static io.scadatom.neutron.Intents.REGISTER_ELECTRON;
 import static io.scadatom.neutron.Intents.VIEW_ELECTRON;
 import static io.scadatom.neutron.Intents.VIEW_PARTICLE;
 import static io.scadatom.neutron.OpResult.FAILURE;
@@ -22,7 +19,6 @@ import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.FlattenedMessage;
 import io.scadatom.neutron.FlattenedMessageHandler;
 import io.scadatom.neutron.OpCtrlReq;
-import io.scadatom.neutron.OpException;
 import io.scadatom.neutron.OpState;
 import io.scadatom.neutron.OpViewReq;
 import java.io.IOException;
@@ -52,7 +48,7 @@ public class OperationService {
   private final SmmChargerService smmChargerService;
   private final SmsChargerService smsChargerService;
   private final OpEventService opEventService;
-  private final OpDataService opDataService;
+  private final OpRepoService opRepoService;
   private final ElectronOpRepository electronOpRepository;
   private final ParticleOpRepository particleOpRepository;
   private final ParticleOpMapper particleOpMapper;
@@ -70,7 +66,7 @@ public class OperationService {
       SmmChargerService smmChargerService,
       SmsChargerService smsChargerService,
       OpEventService opEventService,
-      OpDataService opDataService,
+      OpRepoService opRepoService,
       ElectronOpRepository electronOpRepository,
       ParticleOpRepository particleOpRepository,
       ParticleOpMapper particleOpMapper,
@@ -82,7 +78,7 @@ public class OperationService {
     this.smmChargerService = smmChargerService;
     this.smsChargerService = smsChargerService;
     this.opEventService = opEventService;
-    this.opDataService = opDataService;
+    this.opRepoService = opRepoService;
     this.electronOpRepository = electronOpRepository;
     this.particleOpRepository = particleOpRepository;
     this.particleOpMapper = particleOpMapper;
@@ -117,7 +113,7 @@ public class OperationService {
     try {
       OpViewReq opViewReq = flattenedMessage.peel(OpViewReq.class);
       return new FlattenedMessage(
-          SUCCESS, electronOpMapper.toDto(opDataService.getElectronOp(opViewReq.getId())));
+          SUCCESS, electronOpMapper.toDto(opRepoService.getElectronOp(opViewReq.getId())));
     } catch (IOException e) {
       return new FlattenedMessage(FAILURE + ":can not parse payload");
     }
@@ -133,6 +129,14 @@ public class OperationService {
         case "start":
           start();
           break;
+        case "reload":
+          stop();
+          initialize();
+          start();
+          break;
+        case "reset":
+          System.exit(0);
+          break;
       }
       return new FlattenedMessage(SUCCESS);
     } catch (IOException e) {
@@ -144,7 +148,7 @@ public class OperationService {
     try {
       OpViewReq opViewReq = flattenedMessage.peel(OpViewReq.class);
       return new FlattenedMessage(
-          SUCCESS, particleOpMapper.toDto(opDataService.getParticleOp(opViewReq.getId())));
+          SUCCESS, particleOpMapper.toDto(opRepoService.getParticleOp(opViewReq.getId())));
     } catch (IOException e) {
       return new FlattenedMessage(FAILURE + ":can not parse or form message");
     }
@@ -169,7 +173,7 @@ public class OperationService {
         try {
           smmChargerService.stop();
         } catch (Exception e) {
-          opDataService.updateSmmChargerOp(
+          opRepoService.updateSmmChargerOp(
               smmChargerService.getChargerId(),
               smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
         }
@@ -180,42 +184,24 @@ public class OperationService {
         try {
           smsChargerService.stop();
         } catch (Exception e) {
-          opDataService.updateSmsChargerOp(
+          opRepoService.updateSmsChargerOp(
               smsChargerService.getChargerId(),
               smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
         }
     }
-    opDataService.updateElectronOp(electronId, electronOp -> electronOp.setState(OpState.Stopped));
+    opRepoService.updateElectronOp(electronId, electronOp -> electronOp.setState(OpState.Stopped));
   }
 
   @PostConstruct
   public void onStart() {
-    opDataService.updateElectronOp(
+    opRepoService.updateElectronOp(
         electronId, electronOp -> electronOp.setState(OpState.Uninitialized));
-    ElectronInitReq config =
-        opConfigService
-            .loadConfig()
-            .orElseGet(
-                () -> {
-                  try {
-                    return registerElectron();
-                  } catch (IOException | OpException e) {
-                    log.error("failed to register to nucleus");
-                    return null;
-                  }
-                });
-    if (config != null) {
-      initialize(config);
-      start();
-    } else {
-      log.error("initialization failed, no config available");
-      opDataService.updateElectronOp(
-          electronId, electronOp -> electronOp.setState(OpState.Aborted));
-    }
+    initialize();
+    start();
   }
 
   public void start() {
-    switch (opDataService.getElectronOp(electronId).getState()) {
+    switch (opRepoService.getElectronOp(electronId).getState()) {
       case Initialized:
       case Stopped:
       case Aborted:
@@ -228,7 +214,7 @@ public class OperationService {
               try {
                 smmChargerService.start();
               } catch (Exception e) {
-                opDataService.updateSmmChargerOp(
+                opRepoService.updateSmmChargerOp(
                     smmChargerService.getChargerId(),
                     smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
               }
@@ -242,78 +228,79 @@ public class OperationService {
               try {
                 smsChargerService.start();
               } catch (Exception e) {
-                opDataService.updateSmsChargerOp(
+                opRepoService.updateSmsChargerOp(
                     smsChargerService.getChargerId(),
                     smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
               }
           }
         }
-        opDataService.updateElectronOp(
+        opRepoService.updateElectronOp(
             electronId, electronOp -> electronOp.setState(OpState.Started));
         break;
     }
   }
 
-  private ElectronInitReq registerElectron() throws IOException, OpException {
-    OpCtrlReq opCtrlReq = new OpCtrlReq().id(electronId);
-    Object resp =
-        rabbitTemplate.convertSendAndReceive(
-            TOPIC_SCADATOM,
-            ROUTING_TO_NUCLEUS,
-            new FlattenedMessage(REGISTER_ELECTRON, opCtrlReq).flat());
-    return FlattenedMessage.parseResp(resp, ElectronInitReq.class);
-  }
-
-  private void initialize(ElectronInitReq config) {
+  private void initialize() {
     // drop transient data
     electronOpRepository.deleteAll();
     particleOpRepository.deleteAll();
     // load particles
-    config.getParticleDTOS().stream()
-        .forEach(
-            particleDTO -> {
-              opDataService.updateParticleOp(
-                  particleDTO.getId(),
-                  particleOp -> {
-                    particleOp.setState(OpState.Uninitialized);
-                  });
-            });
-    // load charger service
-    try {
-      smmChargerService.initialize(config);
-    } catch (Exception e) {
-      if (config.getSmmChargerDTO() != null) {
-        opDataService.updateSmmChargerOp(
-            config.getSmmChargerDTO().getId(),
-            smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
-      }
-    }
-    try {
-      smsChargerService.initialize(config);
-    } catch (Exception e) {
-      if (config.getSmsChargerDTO() != null) {
-        opDataService.updateSmsChargerOp(
-            config.getSmsChargerDTO().getId(),
-            smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
-      }
-    }
-    // apply init values
-    config.getParticleDTOS().stream()
-        .forEach(
-            particle -> {
-              if (!StringUtils.isBlank(particle.getInitValue())) {
-                opEventService.onCommandWritten(
-                    particle.getId(), particle.getInitValue(), INIT_VALUE);
-                opEventService.onValueRead(particle.getId(), particle.getInitValue(), INIT_VALUE);
+    opConfigService
+        .getConfig()
+        .ifPresent(
+            config -> {
+              if (config.getElectronDTO().isEnabled()) {
+                config.getParticleDTOS().stream()
+                    .forEach(
+                        particleDTO -> {
+                          opRepoService.updateParticleOp(
+                              particleDTO.getId(),
+                              particleOp -> {
+                                particleOp.setState(OpState.Uninitialized);
+                              });
+                        });
+                // load charger service
+                try {
+                  smmChargerService.initialize(config);
+                } catch (Exception e) {
+                  if (config.getSmmChargerDTO() != null) {
+                    opRepoService.updateSmmChargerOp(
+                        config.getSmmChargerDTO().getId(),
+                        smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
+                  }
+                }
+                try {
+                  smsChargerService.initialize(config);
+                } catch (Exception e) {
+                  if (config.getSmsChargerDTO() != null) {
+                    opRepoService.updateSmsChargerOp(
+                        config.getSmsChargerDTO().getId(),
+                        smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
+                  }
+                }
+                // apply init values
+                config.getParticleDTOS().stream()
+                    .forEach(
+                        particle -> {
+                          if (!StringUtils.isBlank(particle.getInitValue())) {
+                            opEventService.onCommandWritten(
+                                particle.getId(), particle.getInitValue(), INIT_VALUE);
+                            opEventService.onValueRead(
+                                particle.getId(), particle.getInitValue(), INIT_VALUE);
+                          }
+                          opRepoService.updateParticleOp(
+                              particle.getId(),
+                              particleOp -> {
+                                particleOp.setState(OpState.Initialized);
+                              });
+                        });
+                opRepoService.updateElectronOp(
+                    electronId, electronOp -> electronOp.setState(OpState.Initialized));
+              } else {
+                opRepoService.updateElectronOp(
+                    electronId, electronOp -> electronOp.setState(OpState.Disabled));
               }
-              opDataService.updateParticleOp(
-                  particle.getId(),
-                  particleOp -> {
-                    particleOp.setState(OpState.Initialized);
-                  });
             });
-    opDataService.updateElectronOp(
-        electronId, electronOp -> electronOp.setState(OpState.Initialized));
   }
 
   @RabbitListener(queues = "#{queueInboundRequest.name}")

@@ -3,7 +3,6 @@ package io.scadatom.electron.service.operation;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import io.scadatom.electron.domain.ParticleOp;
-import io.scadatom.neutron.ParticleDTO;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,19 +18,22 @@ public class OpEventService {
   private final Multimap<Long, CommandWatcher> commandWatcherMultimap =
       MultimapBuilder.treeKeys().arrayListValues().build();
 
-  private final OpDataService opDataService;
+  private final OpRepoService opRepoService;
   private final OpConfigService opConfigService;
 
-  public OpEventService(OpDataService opDataService, OpConfigService opConfigService) {
-    this.opDataService = opDataService;
-      this.opConfigService = opConfigService;
+  public OpEventService(OpRepoService opRepoService, OpConfigService opConfigService) {
+    this.opRepoService = opRepoService;
+    this.opConfigService = opConfigService;
   }
 
   public void onValueRead(long particleId, double newValueDouble, String source) {
-      opConfigService.getParticleDTO(particleId).ifPresent(particleDTO -> {
-      String newValueStr = particleDTO.getDecimalFormat()
-      });
-
+    opConfigService
+        .getParticleOperation(particleId)
+        .ifPresent(
+            particleOperation -> {
+              onValueRead(
+                  particleId, particleOperation.getDecimalFormat().format(newValueDouble), source);
+            });
   }
 
   /**
@@ -39,9 +41,9 @@ public class OpEventService {
    * broadcast.
    */
   public void onValueRead(long particleId, String newValue, String source) {
-    // if not equal to existing sts, send out update to observer
+    String currentParticleOpValue = opRepoService.getParticleOp(particleId).getValue();
     ParticleOp updateParticleOp =
-        opDataService.updateParticleOp(
+        opRepoService.updateParticleOp(
             particleId,
             particleOp -> {
               particleOp.setValue(newValue);
@@ -49,7 +51,10 @@ public class OpEventService {
               particleOp.setWrittenDt(Instant.now());
             });
     log.debug("valueRead: {}", updateParticleOp);
-    notifyValueChange(particleId, newValue);
+    // if not equal to existing sts, send out update to observer
+    if (!currentParticleOpValue.equals(newValue)) {
+      notifyValueChange(particleId, newValue);
+    }
   }
 
   private void notifyValueChange(long particleId, String newValue) {
@@ -58,10 +63,16 @@ public class OpEventService {
         .forEach(valueWatcher -> valueWatcher.onValueChange(newValue));
   }
 
+    public void onCommandWritten(long particleId, double newCommandDouble, String source) {
+      opConfigService.getParticleOperation(particleId).ifPresent(particleOperation -> {
+          onCommandWritten(particleId,particleOperation.getDecimalFormat().format(newCommandDouble),source);
+      });
+    }
+
   /** Command written from external device by slave charger, */
   public void onCommandWritten(long particleId, String newCommand, String source) {
     ParticleOp updateParticleOp =
-        opDataService.updateParticleOp(
+        opRepoService.updateParticleOp(
             particleId,
             particleOp -> {
               particleOp.setWrittenBy(source);
@@ -71,7 +82,7 @@ public class OpEventService {
     notifyCommandWritten(particleId, newCommand);
     // decide whether to accept the command, now it is always consent
     updateParticleOp =
-        opDataService.updateParticleOp(
+        opRepoService.updateParticleOp(
             particleId,
             particleOp -> {
               particleOp.setValue(newCommand);

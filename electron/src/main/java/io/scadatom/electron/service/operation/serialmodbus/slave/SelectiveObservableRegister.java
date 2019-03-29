@@ -19,4 +19,12 @@ public class SelectiveObservableRegister extends ObservableRegister {
   public final synchronized void setValueOnly(int v) {
     register = (short) v;
   }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SelectiveObservableRegister{");
+        sb.append("register=").append(register);
+        sb.append('}');
+        return sb.toString();
+    }
 }

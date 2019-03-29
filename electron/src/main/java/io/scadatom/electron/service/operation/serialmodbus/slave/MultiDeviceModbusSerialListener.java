@@ -60,4 +60,17 @@ public class MultiDeviceModbusSerialListener extends ModbusSerialListener {
     public ProcessImage getProcessImage(int unitId) {
         return spiMap.get(unitId);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("MultiDeviceModbusSerialListener{");
+        sb.append("respDelay=").append(respDelay);
+        sb.append(", port=").append(port);
+        sb.append(", listening=").append(listening);
+        sb.append(", address=").append(address);
+        sb.append(", error='").append(error).append('\'');
+        sb.append(", timeout=").append(timeout);
+        sb.append('}');
+        return sb.toString();
+    }
 }

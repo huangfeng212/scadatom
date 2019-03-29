@@ -18,7 +18,7 @@ public enum OpState {
      */
     Initialized,
     /**
-     * Not Used
+     * Used for default
      */
     Undefined,
     /**
