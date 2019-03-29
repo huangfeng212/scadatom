@@ -1,7 +1,7 @@
 package io.scadatom.nucleus.service;
 
 import static io.scadatom.neutron.FlattenedMessage.parseResp;
-import static io.scadatom.neutron.Intents.REGISTER_ELECTRON;
+import static io.scadatom.neutron.OpIntents.REGISTER_ELECTRON;
 import static io.scadatom.neutron.OpResult.FAILURE;
 import static io.scadatom.neutron.OpResult.SUCCESS;
 import static io.scadatom.nucleus.config.RabbitmqConfig.ROUTING_TO_ELECTRON;
@@ -13,7 +13,7 @@ import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.ElectronOpDTO;
 import io.scadatom.neutron.FlattenedMessage;
 import io.scadatom.neutron.FlattenedMessageHandler;
-import io.scadatom.neutron.Intents;
+import io.scadatom.neutron.OpIntents;
 import io.scadatom.neutron.OpCtrlReq;
 import io.scadatom.neutron.OpException;
 import io.scadatom.neutron.OpResult;
@@ -149,25 +149,6 @@ public class OperationService {
     return electronInitReq;
   }
 
-  public void initElectron(long id) throws OpException {
-    Optional<Electron> optionalElectron = electronRepository.findById(id);
-    if (optionalElectron.isPresent()) {
-      try {
-        Object resp =
-            rabbitTemplate.convertSendAndReceive(
-                TOPIC_SCADATOM,
-                ROUTING_TO_ELECTRON + id,
-                new FlattenedMessage(Intents.INIT_ELECTRON, makeConfig(optionalElectron.get()))
-                    .flat());
-        parseResp(resp, Void.class);
-      } catch (JsonProcessingException e) {
-        throw new OpException(OpResult.FAILURE + ":json processing error");
-      }
-    } else {
-      throw new OpException(OpResult.INVALID + ":id not exist");
-    }
-  }
-
   public ElectronOpDTO viewElectron(Long id) throws OpException {
     if (electronRepository.existsById(id)) {
       try {
@@ -175,7 +156,7 @@ public class OperationService {
             rabbitTemplate.convertSendAndReceive(
                 TOPIC_SCADATOM,
                 ROUTING_TO_ELECTRON + id,
-                new FlattenedMessage(Intents.VIEW_ELECTRON, new OpViewReq().id(id)).flat());
+                new FlattenedMessage(OpIntents.VIEW_ELECTRON, new OpViewReq().id(id)).flat());
         return parseResp(resp, ElectronOpDTO.class);
       } catch (JsonProcessingException e) {
         throw new OpException(OpResult.FAILURE + ":json processing error");
@@ -195,7 +176,7 @@ public class OperationService {
                 TOPIC_SCADATOM,
                 ROUTING_TO_ELECTRON + electron.getId(),
                 new FlattenedMessage(
-                        Intents.CTRL_ELECTRON,
+                        OpIntents.CTRL_ELECTRON,
                         new OpCtrlReq()
                             .id(electron.getId())
                             .command(opCtrlReq.getCommand())
@@ -219,7 +200,7 @@ public class OperationService {
             rabbitTemplate.convertSendAndReceive(
                 TOPIC_SCADATOM,
                 ROUTING_TO_ELECTRON + particle.getElectron().getId(),
-                new FlattenedMessage(Intents.VIEW_PARTICLE, new OpViewReq().id(id)).flat());
+                new FlattenedMessage(OpIntents.VIEW_PARTICLE, new OpViewReq().id(id)).flat());
         return parseResp(resp, ParticleOpDTO.class);
       } catch (JsonProcessingException e) {
         throw new OpException(OpResult.FAILURE + ":json processing error");
@@ -239,7 +220,7 @@ public class OperationService {
                 TOPIC_SCADATOM,
                 ROUTING_TO_ELECTRON + particle.getElectron().getId(),
                 new FlattenedMessage(
-                        Intents.CTRL_PARTICLE,
+                        OpIntents.CTRL_PARTICLE,
                         new OpCtrlReq()
                             .id(particle.getId())
                             .command(opCtrlReq.getCommand())

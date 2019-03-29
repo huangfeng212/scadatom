@@ -1,7 +1,6 @@
 package io.scadatom.neutron;
 
-public class Intents {
-  public static final String INIT_ELECTRON = "INIT_ELECTRON";
+public class OpIntents {
 
   public static final String VIEW_ELECTRON = "VIEW_ELECTRON";
 

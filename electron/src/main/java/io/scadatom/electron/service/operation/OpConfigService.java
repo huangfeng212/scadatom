@@ -2,8 +2,9 @@ package io.scadatom.electron.service.operation;
 
 import static io.scadatom.electron.config.RabbitmqConfig.ROUTING_TO_NUCLEUS;
 import static io.scadatom.electron.config.RabbitmqConfig.TOPIC_SCADATOM;
-import static io.scadatom.neutron.Intents.REGISTER_ELECTRON;
+import static io.scadatom.neutron.OpIntents.REGISTER_ELECTRON;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.FlattenedMessage;
@@ -42,24 +43,18 @@ public class OpConfigService {
 
   private void loadConfig() {
     try {
-      ElectronInitReq electronInitReq =
-          objectMapper.readValue(
-              new File(
-                  System.getProperty("user.home")
-                      + File.separator
-                      + String.format(CONFIG_FILE_PATTERN, electronId)),
-              ElectronInitReq.class);
-      config = Optional.of(electronInitReq);
+      config =
+          Optional.of(
+              objectMapper.readValue(
+                  new File(
+                      System.getProperty("user.home")
+                          + File.separator
+                          + String.format(CONFIG_FILE_PATTERN, electronId)),
+                  ElectronInitReq.class));
       processConfig();
     } catch (IOException e) {
       log.error("error loading config from disk, try registering with nucleus");
-      try {
-        ElectronInitReq resp = registerElectron();
-        saveConfig(resp);
-        config = Optional.of(resp);
-      } catch (IOException | OpException e1) {
-        log.error("error loading config from nucleus");
-      }
+      registerElectron();
     }
   }
 
@@ -76,17 +71,23 @@ public class OpConfigService {
                     }));
   }
 
-  private ElectronInitReq registerElectron() throws IOException, OpException {
-    OpCtrlReq opCtrlReq = new OpCtrlReq().id(electronId);
-    Object resp =
-        rabbitTemplate.convertSendAndReceive(
-            TOPIC_SCADATOM,
-            ROUTING_TO_NUCLEUS,
-            new FlattenedMessage(REGISTER_ELECTRON, opCtrlReq).flat());
-    return FlattenedMessage.parseResp(resp, ElectronInitReq.class);
+  public void registerElectron() {
+    try {
+      OpCtrlReq opCtrlReq = new OpCtrlReq().id(electronId);
+      Object resp =
+          rabbitTemplate.convertSendAndReceive(
+              TOPIC_SCADATOM,
+              ROUTING_TO_NUCLEUS,
+              new FlattenedMessage(REGISTER_ELECTRON, opCtrlReq).flat());
+      config = Optional.of(FlattenedMessage.parseResp(resp, ElectronInitReq.class));
+      saveConfig();
+      processConfig();
+    } catch (JsonProcessingException | OpException e) {
+      log.error("error loading config from nucleus, no config");
+    }
   }
 
-  public void saveConfig(ElectronInitReq config) {
+  private void saveConfig() {
     try {
       objectMapper
           .writerWithDefaultPrettyPrinter()
@@ -95,9 +96,7 @@ public class OpConfigService {
                   System.getProperty("user.home")
                       + File.separator
                       + String.format(CONFIG_FILE_PATTERN, electronId)),
-              config);
-      this.config = Optional.of(config);
-      processConfig();
+              config.get());
     } catch (IOException e) {
       log.error("failed to write config file to disk");
     }

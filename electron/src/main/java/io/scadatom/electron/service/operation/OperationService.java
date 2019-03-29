@@ -1,10 +1,9 @@
 package io.scadatom.electron.service.operation;
 
-import static io.scadatom.neutron.Intents.CTRL_ELECTRON;
-import static io.scadatom.neutron.Intents.CTRL_PARTICLE;
-import static io.scadatom.neutron.Intents.INIT_ELECTRON;
-import static io.scadatom.neutron.Intents.VIEW_ELECTRON;
-import static io.scadatom.neutron.Intents.VIEW_PARTICLE;
+import static io.scadatom.neutron.OpIntents.CTRL_ELECTRON;
+import static io.scadatom.neutron.OpIntents.CTRL_PARTICLE;
+import static io.scadatom.neutron.OpIntents.VIEW_ELECTRON;
+import static io.scadatom.neutron.OpIntents.VIEW_PARTICLE;
 import static io.scadatom.neutron.OpResult.FAILURE;
 import static io.scadatom.neutron.OpResult.SUCCESS;
 
@@ -15,16 +14,15 @@ import io.scadatom.electron.service.mapper.ElectronOpMapper;
 import io.scadatom.electron.service.mapper.ParticleOpMapper;
 import io.scadatom.electron.service.operation.serialmodbus.master.SmmChargerService;
 import io.scadatom.electron.service.operation.serialmodbus.slave.SmsChargerService;
-import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.FlattenedMessage;
 import io.scadatom.neutron.FlattenedMessageHandler;
+import io.scadatom.neutron.OpCtrlCmds;
 import io.scadatom.neutron.OpCtrlReq;
 import io.scadatom.neutron.OpState;
 import io.scadatom.neutron.OpViewReq;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
@@ -84,29 +82,11 @@ public class OperationService {
     this.particleOpMapper = particleOpMapper;
     this.electronOpMapper = electronOpMapper;
     this.electronId = electronId;
-    inboundRequestHandlers.put(INIT_ELECTRON, this::handleInitElectron);
     inboundRequestHandlers.put(VIEW_ELECTRON, this::handleViewElectron);
     inboundRequestHandlers.put(CTRL_ELECTRON, this::handleCtrlElectron);
     inboundRequestHandlers.put(VIEW_PARTICLE, this::handleViewParticle);
     inboundRequestHandlers.put(CTRL_PARTICLE, this::handleCtrlParticle);
     flattenedMessageHandler = new FlattenedMessageHandler(inboundRequestHandlers);
-  }
-
-  private FlattenedMessage handleInitElectron(FlattenedMessage flattenedMessage) {
-    try {
-      ElectronInitReq electronInitReq = flattenedMessage.peel(ElectronInitReq.class);
-      if (!Objects.equals(electronInitReq.getElectronDTO().getId(), electronId)) {
-        return new FlattenedMessage(FAILURE + ":non matching electron id from payload");
-      }
-      opConfigService.saveConfig(electronInitReq);
-      stop();
-      onStart();
-      return new FlattenedMessage(SUCCESS);
-    } catch (IOException e) {
-      return new FlattenedMessage(FAILURE + ":can not parse payload");
-    } catch (Exception e) {
-      return new FlattenedMessage(FAILURE + ":" + e.getMessage());
-    }
   }
 
   private FlattenedMessage handleViewElectron(FlattenedMessage flattenedMessage) {
@@ -123,18 +103,17 @@ public class OperationService {
     try {
       OpCtrlReq opCtrlReq = flattenedMessage.peel(OpCtrlReq.class);
       switch (opCtrlReq.getCommand()) {
-        case "stop":
+        case OpCtrlCmds.RESTART:
           stop();
-          break;
-        case "start":
           start();
           break;
-        case "reload":
+        case OpCtrlCmds.RELOAD:
           stop();
+          opConfigService.registerElectron();
           initialize();
           start();
           break;
-        case "reset":
+        case OpCtrlCmds.RESET:
           System.exit(0);
           break;
       }
@@ -190,14 +169,6 @@ public class OperationService {
         }
     }
     opRepoService.updateElectronOp(electronId, electronOp -> electronOp.setState(OpState.Stopped));
-  }
-
-  @PostConstruct
-  public void onStart() {
-    opRepoService.updateElectronOp(
-        electronId, electronOp -> electronOp.setState(OpState.Uninitialized));
-    initialize();
-    start();
   }
 
   public void start() {
@@ -301,6 +272,14 @@ public class OperationService {
                     electronId, electronOp -> electronOp.setState(OpState.Disabled));
               }
             });
+  }
+
+  @PostConstruct
+  public void onStart() {
+    opRepoService.updateElectronOp(
+        electronId, electronOp -> electronOp.setState(OpState.Uninitialized));
+    initialize();
+    start();
   }
 
   @RabbitListener(queues = "#{queueInboundRequest.name}")

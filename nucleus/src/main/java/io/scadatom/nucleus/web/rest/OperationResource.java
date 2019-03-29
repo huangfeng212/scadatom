@@ -28,12 +28,6 @@ public class OperationResource {
     this.operationService = operationService;
   }
 
-  /** POST initElectron */
-  @PostMapping("/electron")
-  public void initElectron(@Valid @RequestBody OpCtrlReq opCtrlReq) throws OpException {
-    operationService.initElectron(opCtrlReq.getId());
-  }
-
   /** GET viewElectron */
   @GetMapping("/electron/{id}")
   public ElectronOpDTO viewElectron(@PathVariable Long id) throws OpException {
