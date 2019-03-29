@@ -2,10 +2,10 @@ package io.scadatom.neutron;
 
 /**
  * The OpState enumeration.
- * Charger can be Uninitialized, Initialized, Undefined, Disabled, Stopped, Started, Aborted
+ * Charger can be Uninitialized, Initialized, Disabled, Started, Aborted
  * Device can be Uninitialized, Initialized, Disabled
  * Bond can be Uninitialized, Initialized, Disabled
- * Electron can be Uninitialized, Initialized, Stopped, Started, Aborted
+ * Electron can be Uninitialized, Initialized, Disabled, Started, Aborted
  * Particle can be Uninitialized, Initialized
  */
 public enum OpState {
@@ -18,15 +18,15 @@ public enum OpState {
      */
     Initialized,
     /**
-     * Applied to Charger
+     * Not Used
      */
     Undefined,
     /**
-     * Applied to Charger, Device, Bond
+     * Applied to Charger, Device, Bond, Electron
      */
     Disabled,
     /**
-     * Applied to Charger, Electron
+     * Not Used
      */
     Stopped,
     /**

@@ -1,17 +1,18 @@
 package io.scadatom.neutron;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class ElectronInitReq {
 
   private ElectronDTO electronDTO;
-  private Set<ParticleDTO> particleDTOS;
+  private Set<ParticleDTO> particleDTOS = new HashSet<>();
   private SmmChargerDTO smmChargerDTO;
-  private Set<SmmDeviceDTO> smmDeviceDTOS;
-  private Set<SmmBondDTO> smmBondDTOS;
+  private Set<SmmDeviceDTO> smmDeviceDTOS = new HashSet<>();
+  private Set<SmmBondDTO> smmBondDTOS = new HashSet<>();
   private SmsChargerDTO smsChargerDTO;
-  private Set<SmsDeviceDTO> smsDeviceDTOS;
-  private Set<SmsBondDTO> smsBondDTOS;
+  private Set<SmsDeviceDTO> smsDeviceDTOS = new HashSet<>();
+  private Set<SmsBondDTO> smsBondDTOS = new HashSet<>();
 
   public ElectronDTO getElectronDTO() {
     return electronDTO;

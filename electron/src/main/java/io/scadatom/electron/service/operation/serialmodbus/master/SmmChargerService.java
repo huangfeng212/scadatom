@@ -83,6 +83,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
     abstractSerialConnection.close(); // todo can this be closed if already closed?
     opDataService.updateSmmChargerOp(
         smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Stopped));
+        //TODO unregister cmd/sts watcher
   }
 
   @Override

@@ -28,7 +28,9 @@ public class OpEventService {
   }
 
   public void onValueRead(long particleId, double newValueDouble, String source) {
-      ParticleDTO particleDTO = opConfigService.getOptionalElectronInitReq().ifPresent(electronInitReq -> electronInitReq.getParticleDTOS().get);
+      opConfigService.getParticleDTO(particleId).ifPresent(particleDTO -> {
+      String newValueStr = particleDTO.getDecimalFormat()
+      });
 
   }
 
