@@ -14,12 +14,14 @@ import io.scadatom.electron.service.mapper.ElectronOpMapper;
 import io.scadatom.electron.service.mapper.ParticleOpMapper;
 import io.scadatom.electron.service.operation.serialmodbus.master.SmmChargerService;
 import io.scadatom.electron.service.operation.serialmodbus.slave.SmsChargerService;
+import io.scadatom.neutron.ElectronOpDTO;
 import io.scadatom.neutron.FlattenedMessage;
 import io.scadatom.neutron.FlattenedMessageHandler;
 import io.scadatom.neutron.OpCtrlCmds;
 import io.scadatom.neutron.OpCtrlReq;
 import io.scadatom.neutron.OpState;
 import io.scadatom.neutron.OpViewReq;
+import io.scadatom.neutron.ParticleOpDTO;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,9 +42,7 @@ public class OperationService {
 
   public static final String INIT_VALUE = "InitValue";
   private final Logger log = LoggerFactory.getLogger(OperationService.class);
-  private final ObjectMapper objectMapper;
-  private final RabbitTemplate rabbitTemplate;
-  private final OpConfigService opConfigService;
+    private final OpConfigService opConfigService;
   private final SmmChargerService smmChargerService;
   private final SmsChargerService smsChargerService;
   private final OpEventService opEventService;
@@ -58,8 +58,6 @@ public class OperationService {
   private final Long electronId;
 
   public OperationService(
-      ObjectMapper objectMapper,
-      RabbitTemplate rabbitTemplate,
       OpConfigService opConfigService,
       SmmChargerService smmChargerService,
       SmsChargerService smsChargerService,
@@ -70,9 +68,7 @@ public class OperationService {
       ParticleOpMapper particleOpMapper,
       ElectronOpMapper electronOpMapper,
       @Value("${electron.id}") Long electronId) {
-    this.objectMapper = objectMapper;
-    this.rabbitTemplate = rabbitTemplate;
-    this.opConfigService = opConfigService;
+      this.opConfigService = opConfigService;
     this.smmChargerService = smmChargerService;
     this.smsChargerService = smsChargerService;
     this.opEventService = opEventService;
@@ -92,8 +88,7 @@ public class OperationService {
   private FlattenedMessage handleViewElectron(FlattenedMessage flattenedMessage) {
     try {
       OpViewReq opViewReq = flattenedMessage.peel(OpViewReq.class);
-      return new FlattenedMessage(
-          SUCCESS, electronOpMapper.toDto(opRepoService.getElectronOp(opViewReq.getId())));
+      return new FlattenedMessage(SUCCESS, viewElectron(opViewReq.getId()));
     } catch (IOException e) {
       return new FlattenedMessage(FAILURE + ":can not parse payload");
     }
@@ -101,22 +96,7 @@ public class OperationService {
 
   private FlattenedMessage handleCtrlElectron(FlattenedMessage flattenedMessage) {
     try {
-      OpCtrlReq opCtrlReq = flattenedMessage.peel(OpCtrlReq.class);
-      switch (opCtrlReq.getCommand()) {
-        case OpCtrlCmds.RESTART:
-          stop();
-          start();
-          break;
-        case OpCtrlCmds.RELOAD:
-          stop();
-          opConfigService.registerElectron();
-          initialize();
-          start();
-          break;
-        case OpCtrlCmds.RESET:
-          System.exit(0);
-          break;
-      }
+      ctrlElectron(flattenedMessage.peel(OpCtrlReq.class));
       return new FlattenedMessage(SUCCESS);
     } catch (IOException e) {
       return new FlattenedMessage(FAILURE + ":can not parse payload");
@@ -126,8 +106,7 @@ public class OperationService {
   private FlattenedMessage handleViewParticle(FlattenedMessage flattenedMessage) {
     try {
       OpViewReq opViewReq = flattenedMessage.peel(OpViewReq.class);
-      return new FlattenedMessage(
-          SUCCESS, particleOpMapper.toDto(opRepoService.getParticleOp(opViewReq.getId())));
+      return new FlattenedMessage(SUCCESS, viewParticle(opViewReq.getId()));
     } catch (IOException e) {
       return new FlattenedMessage(FAILURE + ":can not parse or form message");
     }
@@ -135,13 +114,44 @@ public class OperationService {
 
   private FlattenedMessage handleCtrlParticle(FlattenedMessage flattenedMessage) {
     try {
-      OpCtrlReq opCtrlReq = flattenedMessage.peel(OpCtrlReq.class);
-      opEventService.onCommandWritten(
-          opCtrlReq.getId(), opCtrlReq.getCommand(), "RemoteUser_" + opCtrlReq.getUser());
+      ctrlParticle(flattenedMessage.peel(OpCtrlReq.class), true);
       return new FlattenedMessage(SUCCESS);
     } catch (IOException e) {
       return new FlattenedMessage(FAILURE + ":can not parse");
     }
+  }
+
+  public ElectronOpDTO viewElectron(Long id) {
+    return electronOpMapper.toDto(opRepoService.getElectronOp(id));
+  }
+
+  public void ctrlElectron(OpCtrlReq opCtrlReq) {
+    switch (opCtrlReq.getCommand()) {
+      case OpCtrlCmds.RESTART:
+        stop();
+        start();
+        break;
+      case OpCtrlCmds.RELOAD:
+        stop();
+        opConfigService.registerElectron();
+        initialize();
+        start();
+        break;
+      case OpCtrlCmds.RESET:
+        System.exit(0);
+        break;
+    }
+  }
+
+  public ParticleOpDTO viewParticle(Long id) {
+    return particleOpMapper.toDto(opRepoService.getParticleOp(id));
+  }
+
+  public void ctrlParticle(OpCtrlReq opCtrlReq, boolean isRemoteUser) {
+    opEventService.onCommandWritten(
+        opCtrlReq.getId(),
+        opCtrlReq.getCommand(),
+        isRemoteUser ? "RemoteUser_" : "LocalUser_" + opCtrlReq.getUser());
   }
 
   public void stop() {

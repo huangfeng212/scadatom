@@ -13,6 +13,13 @@
                 <dd>
                     <span>{{electronOp.dt}}</span>
                 </dd>
+                <dt><span>Command</span></dt>
+                <dd>
+                    <input #cmdInput (keyup.enter)="writeCommand(cmdInput.value)" class="input-sm"
+                           id="input_command" type="text"/>
+                    <button (click)="writeCommand(cmdInput.value)" class="btn btn-success"><span>Send</span>
+                    </button>
+                </dd>
             </dl>
 
             <button type="submit"

@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import * as moment from 'moment';
-import { DATE_FORMAT } from 'app/shared/constants/input.constants';
 import { map } from 'rxjs/operators';
 
 import { SERVER_API_URL } from 'app/app.constants';
 import { createRequestOption } from 'app/shared';
 import { IParticleOp } from 'app/shared/model/particle-op.model';
+import { IOpCtrlReq } from 'app/shared/model/operation.model';
 
 type EntityResponseType = HttpResponse<IParticleOp>;
 type EntityArrayResponseType = HttpResponse<IParticleOp[]>;
@@ -15,6 +15,7 @@ type EntityArrayResponseType = HttpResponse<IParticleOp[]>;
 @Injectable({ providedIn: 'root' })
 export class ParticleOpService {
     public resourceUrl = SERVER_API_URL + 'api/particle-ops';
+    public operationUrl = SERVER_API_URL + 'api/operation/particle';
 
     constructor(protected http: HttpClient) {}
 
@@ -47,6 +48,10 @@ export class ParticleOpService {
 
     delete(id: number): Observable<HttpResponse<any>> {
         return this.http.delete<any>(`${this.resourceUrl}/${id}`, { observe: 'response' });
+    }
+
+    ctrl(opCtrlReq: IOpCtrlReq): Observable<HttpResponse<any>> {
+        return this.http.put<IOpCtrlReq>(this.operationUrl, opCtrlReq, { observe: 'response' });
     }
 
     protected convertDateFromClient(particleOp: IParticleOp): IParticleOp {
