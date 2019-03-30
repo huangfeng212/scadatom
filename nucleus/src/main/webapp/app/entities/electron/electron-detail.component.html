@@ -15,6 +15,21 @@
             <dd>
               <span>{{electron.enabled}}</span>
             </dd>
+            <dt><span>State</span></dt>
+            <dd>
+              <span>{{electronOp?electronOp.state:'loading...'}}</span>
+            </dd>
+            <dt><span>Date Time</span></dt>
+            <dd>
+              <span>{{electronOp?electronOp.dt:'loading...'}}</span>
+            </dd>
+            <dt><span>Command</span></dt>
+            <dd>
+              <input #cmdInput (keyup.enter)="writeCommand(cmdInput.value)" class="input-sm"
+                     id="input_command" type="text"/>
+              <button (click)="writeCommand(cmdInput.value)" class="btn btn-success"><span>Send</span>
+              </button>
+            </dd>
           </dl>
         </div>
         <div class="col-6">

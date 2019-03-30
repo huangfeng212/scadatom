@@ -7,7 +7,6 @@ import static io.scadatom.neutron.OpIntents.VIEW_PARTICLE;
 import static io.scadatom.neutron.OpResult.FAILURE;
 import static io.scadatom.neutron.OpResult.SUCCESS;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.scadatom.electron.repository.ElectronOpRepository;
 import io.scadatom.electron.repository.ParticleOpRepository;
 import io.scadatom.electron.service.mapper.ElectronOpMapper;
@@ -31,7 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +40,7 @@ public class OperationService {
 
   public static final String INIT_VALUE = "InitValue";
   private final Logger log = LoggerFactory.getLogger(OperationService.class);
-    private final OpConfigService opConfigService;
+  private final OpConfigService opConfigService;
   private final SmmChargerService smmChargerService;
   private final SmsChargerService smsChargerService;
   private final OpEventService opEventService;
@@ -68,7 +66,7 @@ public class OperationService {
       ParticleOpMapper particleOpMapper,
       ElectronOpMapper electronOpMapper,
       @Value("${electron.id}") Long electronId) {
-      this.opConfigService = opConfigService;
+    this.opConfigService = opConfigService;
     this.smmChargerService = smmChargerService;
     this.smsChargerService = smsChargerService;
     this.opEventService = opEventService;
@@ -151,7 +149,7 @@ public class OperationService {
     opEventService.onCommandWritten(
         opCtrlReq.getId(),
         opCtrlReq.getCommand(),
-        isRemoteUser ? "RemoteUser_" : "LocalUser_" + opCtrlReq.getUser());
+        (isRemoteUser ? "RemoteUser_" : "LocalUser_") + opCtrlReq.getUser());
   }
 
   public void stop() {

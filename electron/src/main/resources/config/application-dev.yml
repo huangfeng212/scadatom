@@ -18,7 +18,7 @@ logging:
         ROOT: DEBUG
         io.github.jhipster: DEBUG
         io.scadatom.electron: DEBUG
-#        org.springframework.amqp: DEBUG
+        org.springframework.amqp: DEBUG
         com.ghgande.j2mod.modbus: INFO
     pattern:
         console: "%d{MM-dd HH:mm:ss} [%thread] [%highlight(%.-1level)] [%20logger{20}:%3.3line] - %msg%n"

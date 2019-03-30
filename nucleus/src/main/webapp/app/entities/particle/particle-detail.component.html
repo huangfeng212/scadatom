@@ -19,6 +19,33 @@
             <dd>
               <span>{{particle.initValue}}</span>
             </dd>
+            <dt><span>State</span></dt>
+            <dd>
+              <span>{{particleOp?particleOp.state:"loading..."}}</span>
+            </dd>
+            <dt><span>Dt</span></dt>
+            <dd>
+              <span>{{particleOp?particleOp.dt:"loading..."}}</span>
+            </dd>
+            <dt><span>Value</span></dt>
+            <dd>
+              <span>{{particleOp?particleOp.value:"loading..."}}</span>
+            </dd>
+            <dt><span>Written By</span></dt>
+            <dd>
+              <span>{{particleOp?particleOp.writtenBy:"loading..."}}</span>
+            </dd>
+            <dt><span>Written Dt</span></dt>
+            <dd>
+              <span>{{particleOp?particleOp.writtenDt:"loading..."}}</span>
+            </dd>
+            <dt><span>Command</span></dt>
+            <dd>
+              <input #cmdInput (keyup.enter)="writeCommand(cmdInput.value)" class="input-sm"
+                     id="input_command" type="text"/>
+              <button (click)="writeCommand(cmdInput.value)" class="btn btn-success"><span>Send</span>
+              </button>
+            </dd>
           </dl>
         </div>
         <div class="col-6">
