@@ -15,6 +15,7 @@ import io.scadatom.neutron.SmsChargerDTO;
 import io.scadatom.neutron.SmsDeviceDTO;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class SmsChargerService extends AbstractChargerService {
   private SerialParameters serialParameters;
   private ModbusSerialListener listener;
   private Thread listenerThread;
-  private SmsChargerDTO smsChargerDTO;
+  private Optional<SmsChargerDTO> smsChargerDTOOptional = Optional.empty();
   private Map<Long, SmsDeviceDTO> smsDeviceDTOMap = new HashMap<>();
   private Map<Long, SmsBondDTO> smsBondDTOMap = new HashMap<>();
   private Map<Long, SmsBondOperation> smsBondOperationMap = new HashMap<>();
@@ -44,8 +45,10 @@ public class SmsChargerService extends AbstractChargerService {
   public void start() {
     log.info("opening port {} and starting listener ...", serialParameters.getPortName());
     listenerThread.start();
-    opRepoService.updateSmsChargerOp(
-        smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Started));
+    smsChargerDTOOptional.ifPresent(
+        smsChargerDTO ->
+            opRepoService.updateSmsChargerOp(
+                smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Started)));
   }
 
   @Override
@@ -59,16 +62,19 @@ public class SmsChargerService extends AbstractChargerService {
           "joining listener thread failed. {}, {}", ex.getClass().getSimpleName(), ex.getMessage());
     }
     processImageMap.clear();
-    opRepoService.updateSmsChargerOp(
-        smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Stopped));
+    smsChargerDTOOptional.ifPresent(
+        smsChargerDTO ->
+            opRepoService.updateSmsChargerOp(
+                smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Stopped)));
   }
 
   @Override
   public void initialize(ElectronInitReq config) {
-    smsChargerDTO = config.getSmsChargerDTO();
+    SmsChargerDTO smsChargerDTO = config.getSmsChargerDTO();
     if (smsChargerDTO == null) {
       return;
     }
+    smsChargerDTOOptional = Optional.of(smsChargerDTO);
     if (!smsChargerDTO.getEnabled()) {
       opRepoService.updateSmsChargerOp(
           smsChargerDTO.getId(), smsChargerOp -> smsChargerOp.setState(OpState.Disabled));
@@ -155,11 +161,13 @@ public class SmsChargerService extends AbstractChargerService {
 
   @Override
   public OpState getState() {
-    return opRepoService.getSmsChargerOp(smsChargerDTO.getId()).getState();
+    return smsChargerDTOOptional
+        .map(smsChargerDTO -> opRepoService.getSmsChargerOp(smsChargerDTO.getId()).getState())
+        .orElse(OpState.Undefined);
   }
 
   @Override
-  public Long getChargerId() {
-    return smsChargerDTO == null ? null : smsChargerDTO.getId();
+  public Optional<Long> getChargerId() {
+    return smsChargerDTOOptional.map(smsChargerDTO -> smsChargerDTO.getId());
   }
 }

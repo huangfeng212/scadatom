@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
   private ModbusSerialTransaction modbusSerialTransaction;
   private Thread updateThread;
   private volatile boolean updateFlag;
-  private SmmChargerDTO smmChargerDTO;
+  private Optional<SmmChargerDTO> smmChargerDTOOptional = Optional.empty();
   private Map<Long, SmmDeviceDTO> smmDeviceDTOMap = new HashMap<>();
   private Map<Long, SmmBondDTO> smmBondDTOMap = new HashMap<>();
   private Map<Long, SmmBondOperation> smmBondOperationMap =
@@ -59,14 +60,17 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
   public void start() throws IOException {
     log.info("opening port {} ...", serialParameters.getPortName());
     abstractSerialConnection.open();
-    modbusSerialTransaction = new ModbusSerialTransaction(abstractSerialConnection);
-    modbusSerialTransaction.setRetries(smmChargerDTO.getRetry());
-    modbusSerialTransaction.setTransDelayMS(smmChargerDTO.getTransDelay());
-    log.info("starting polling thread ...");
-    updateFlag = true;
-    updateThread.start();
-    opRepoService.updateSmmChargerOp(
-        smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Started));
+    smmChargerDTOOptional.ifPresent(
+        smmChargerDTO -> {
+          modbusSerialTransaction = new ModbusSerialTransaction(abstractSerialConnection);
+          modbusSerialTransaction.setRetries(smmChargerDTO.getRetry());
+          modbusSerialTransaction.setTransDelayMS(smmChargerDTO.getTransDelay());
+          log.info("starting polling thread ...");
+          updateFlag = true;
+          updateThread.start();
+          opRepoService.updateSmmChargerOp(
+              smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Started));
+        });
   }
 
   @Override
@@ -81,16 +85,19 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
     }
     log.info("stopping port {} ...", serialParameters.getPortName());
     abstractSerialConnection.close(); // todo can this be closed if already closed?
-    opRepoService.updateSmmChargerOp(
-        smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Stopped));
+    smmChargerDTOOptional.ifPresent(
+        smmChargerDTO ->
+            opRepoService.updateSmmChargerOp(
+                smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Stopped)));
   }
 
   @Override
   public void initialize(@NotNull ElectronInitReq config) {
-    smmChargerDTO = config.getSmmChargerDTO();
+    SmmChargerDTO smmChargerDTO = config.getSmmChargerDTO();
     if (smmChargerDTO == null) {
       return;
     }
+    smmChargerDTOOptional = Optional.of(smmChargerDTO);
     if (!smmChargerDTO.getEnabled()) {
       opRepoService.updateSmmChargerOp(
           smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Disabled));
@@ -202,7 +209,7 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
             smmChargerDTO.getParity(),
             smmChargerDTO.getStopbit());
     abstractSerialConnection = new SerialConnection(serialParameters);
-    abstractSerialConnection.setTimeout(this.smmChargerDTO.getTimeout());
+    abstractSerialConnection.setTimeout(smmChargerDTO.getTimeout());
     updateThread = new Thread(this, "SmmCharger Service Poller");
     opRepoService.updateSmmChargerOp(
         smmChargerDTO.getId(), smmChargerOp -> smmChargerOp.setState(OpState.Initialized));
@@ -210,12 +217,14 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
 
   @Override
   public OpState getState() {
-    return opRepoService.getSmmChargerOp(smmChargerDTO.getId()).getState();
+    return smmChargerDTOOptional
+        .map(smmChargerDTO -> opRepoService.getSmmChargerOp(smmChargerDTO.getId()).getState())
+        .orElse(OpState.Undefined);
   }
 
   @Override
-  public Long getChargerId() {
-    return smmChargerDTO == null ? null : smmChargerDTO.getId();
+  public Optional<Long> getChargerId() {
+    return smmChargerDTOOptional.map(smmChargerDTO -> smmChargerDTO.getId());
   }
 
   @Override
@@ -223,7 +232,8 @@ public class SmmChargerService extends AbstractChargerService implements Runnabl
     outerloop:
     while (updateFlag) {
       try {
-        Instant untilInstant = Instant.now().plus(smmChargerDTO.getBatchDelay(), MILLIS);
+        Instant untilInstant =
+            Instant.now().plus(smmChargerDTOOptional.get().getBatchDelay(), MILLIS);
         for (SmmBondOperation smmBondOperation : smmBondOperationMap.values()) {
           if (updateFlag) {
             readStsAndWriteCmd(smmBondOperation); // sts and comm will be set inside

@@ -127,6 +127,7 @@ public class OperationService {
     switch (opCtrlReq.getCommand()) {
       case OpCtrlCmds.RESTART:
         stop();
+        initialize();
         start();
         break;
       case OpCtrlCmds.RELOAD:
@@ -161,7 +162,7 @@ public class OperationService {
           smmChargerService.stop();
         } catch (Exception e) {
           opRepoService.updateSmmChargerOp(
-              smmChargerService.getChargerId(),
+              smmChargerService.getChargerId().get(),
               smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
         }
     }
@@ -172,51 +173,11 @@ public class OperationService {
           smsChargerService.stop();
         } catch (Exception e) {
           opRepoService.updateSmsChargerOp(
-              smsChargerService.getChargerId(),
+              smsChargerService.getChargerId().get(),
               smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
         }
     }
     opRepoService.updateElectronOp(electronId, electronOp -> electronOp.setState(OpState.Stopped));
-  }
-
-  public void start() {
-    switch (opRepoService.getElectronOp(electronId).getState()) {
-      case Initialized:
-      case Stopped:
-      case Aborted:
-        // onStart bond service
-        if (smmChargerService.getChargerId() != null) {
-          switch (smmChargerService.getState()) {
-            case Initialized:
-            case Aborted:
-            case Stopped:
-              try {
-                smmChargerService.start();
-              } catch (Exception e) {
-                opRepoService.updateSmmChargerOp(
-                    smmChargerService.getChargerId(),
-                    smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
-              }
-          }
-        }
-        if (smsChargerService.getChargerId() != null) {
-          switch (smsChargerService.getState()) {
-            case Initialized:
-            case Aborted:
-            case Stopped:
-              try {
-                smsChargerService.start();
-              } catch (Exception e) {
-                opRepoService.updateSmsChargerOp(
-                    smsChargerService.getChargerId(),
-                    smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
-              }
-          }
-        }
-        opRepoService.updateElectronOp(
-            electronId, electronOp -> electronOp.setState(OpState.Started));
-        break;
-    }
   }
 
   private void initialize() {
@@ -280,6 +241,50 @@ public class OperationService {
                     electronId, electronOp -> electronOp.setState(OpState.Disabled));
               }
             });
+  }
+
+  public void start() {
+    switch (opRepoService.getElectronOp(electronId).getState()) {
+      case Initialized:
+      case Stopped:
+      case Aborted:
+        // onStart bond service
+        smmChargerService
+            .getChargerId()
+            .ifPresent(
+                chargerId -> {
+                  switch (smmChargerService.getState()) {
+                    case Initialized:
+                    case Aborted:
+                    case Stopped:
+                      try {
+                        smmChargerService.start();
+                      } catch (Exception e) {
+                        opRepoService.updateSmmChargerOp(
+                            chargerId, smmChargerOp -> smmChargerOp.setState(OpState.Aborted));
+                      }
+                  }
+                });
+        smsChargerService
+            .getChargerId()
+            .ifPresent(
+                chargerId -> {
+                  switch (smsChargerService.getState()) {
+                    case Initialized:
+                    case Aborted:
+                    case Stopped:
+                      try {
+                        smsChargerService.start();
+                      } catch (Exception e) {
+                        opRepoService.updateSmsChargerOp(
+                            chargerId, smsChargerOp -> smsChargerOp.setState(OpState.Aborted));
+                      }
+                  }
+                });
+        opRepoService.updateElectronOp(
+            electronId, electronOp -> electronOp.setState(OpState.Started));
+        break;
+    }
   }
 
   @PostConstruct

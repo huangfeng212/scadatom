@@ -2,7 +2,7 @@ package io.scadatom.electron.service;
 
 import io.scadatom.neutron.ElectronInitReq;
 import io.scadatom.neutron.OpState;
-import java.io.IOException;
+import java.util.Optional;
 
 public abstract class AbstractChargerService {
 
@@ -14,6 +14,5 @@ public abstract class AbstractChargerService {
 
   public abstract OpState getState();
 
-  public abstract Long getChargerId();
-
+  public abstract Optional<Long> getChargerId();
 }
