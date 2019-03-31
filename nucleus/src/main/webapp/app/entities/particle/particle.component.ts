@@ -14,7 +14,7 @@ import {ParticleService} from './particle.service';
 })
 export class ParticleComponent implements OnInit, OnDestroy {
   particles: IParticle[];
-  particleOps: any;
+  particleOps = {};
   currentAccount: any;
   eventSubscriber: Subscription;
 
@@ -36,6 +36,14 @@ export class ParticleComponent implements OnInit, OnDestroy {
     .subscribe(
         (res: IParticle[]) => {
           this.particles = res;
+          this.particles.forEach(value => {
+            this.particleService.view(value.id).subscribe(value1 => {
+              this.particleOps[value1.body.id] = value1.body;
+              console.log(this.particleOps)
+            }, error1 => {
+              console.log(error1.error.detail)
+            })
+          })
         },
         (res: HttpErrorResponse) => this.onError(res.message)
     );
